@@ -8,10 +8,11 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-
+import frc.robot.commands.DriveForwardSecs;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.TeleopArcadeDrive;
 import frc.robot.subsystems.RomiDrivetrain;
@@ -30,10 +31,9 @@ public class RobotContainer {
 
   // Assumes a gamepad plugged into channel 0.
   private final Joystick controller = new Joystick(0);
+  private final JoystickButton joystickButton = new JoystickButton(controller, 12);
 
   private final ExampleCommand autoCommand = new ExampleCommand(drivetrain);
-
-
 
   /**
    * The container for the robot.  Contains subsystems, OI devices, and commands.
@@ -54,6 +54,8 @@ public class RobotContainer {
       new TeleopArcadeDrive(drivetrain,
         () ->  controller.getRawAxis(1),
         () -> -controller.getRawAxis(3)));
+
+    joystickButton.whenPressed(new DriveForwardSecs(drivetrain, 3));
   }
 
   /**
