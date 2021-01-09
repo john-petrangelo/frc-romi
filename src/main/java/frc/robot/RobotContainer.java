@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.commands.DriveForward;
 import frc.robot.commands.DriveForwardSecs;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.ArcadeDrive;
@@ -31,7 +32,8 @@ public class RobotContainer {
 
   // Assumes a gamepad plugged into channel 0.
   private final Joystick controller = new Joystick(0);
-  private final JoystickButton joystickButton = new JoystickButton(controller, 12);
+  private final JoystickButton povUp = new JoystickButton(controller, 12);
+  // private final JoystickButton povDown = new JoystickButton(controller, 13);
 
   private final ExampleCommand autoCommand = new ExampleCommand(drivetrain);
 
@@ -55,8 +57,8 @@ public class RobotContainer {
         () -> -controller.getRawAxis(1),
         () -> -controller.getRawAxis(3)));
 
-    joystickButton.whenPressed(new DriveForwardSecs(drivetrain, 3));
-  }
+        povUp.whenPressed(new DriveForward(drivetrain, 12.0));
+      }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

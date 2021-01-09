@@ -10,15 +10,13 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.RomiDrivetrain;
 
-public class DriveForwardSecs extends CommandBase {
+public class DriveForward extends CommandBase {
     private RomiDrivetrain drivetrain;
-    private long durationMS;
+    private double distance;
 
-    private double startTimeMS;
-
-    public DriveForwardSecs(RomiDrivetrain drivetrain, double durationSecs) {
+    public DriveForward(RomiDrivetrain drivetrain, double distance) {
         this.drivetrain = drivetrain;
-        this.durationMS = (long)(1000 * durationSecs);
+        this.distance = distance;
 
         addRequirements(drivetrain);
     }
@@ -26,7 +24,7 @@ public class DriveForwardSecs extends CommandBase {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        startTimeMS = System.currentTimeMillis();
+        drivetrain.resetEncoders();
     }
 
     // Called every time the scheduler runs while the command is scheduled.
@@ -43,7 +41,6 @@ public class DriveForwardSecs extends CommandBase {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        long now = System.currentTimeMillis();
-        return now - startTimeMS >= durationMS;
+        return drivetrain.getRightDistanceInch() > distance && drivetrain.getLeftDistanceInch() > distance;
     }
 }
