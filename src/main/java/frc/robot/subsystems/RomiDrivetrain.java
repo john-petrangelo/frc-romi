@@ -40,8 +40,8 @@ public class RomiDrivetrain extends SubsystemBase {
     resetEncoders();
   }
 
-  public void arcadeDrive(double xaxisSpeed, double zaxisRotate) {
-    m_diffDrive.arcadeDrive(xaxisSpeed, zaxisRotate, false);
+  public void arcadeDrive(double speed, double rotation) {
+    m_diffDrive.arcadeDrive(-speed, rotation, false);
   }
 
   public void resetEncoders() {

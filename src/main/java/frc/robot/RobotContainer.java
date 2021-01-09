@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commands.DriveForwardSecs;
 import frc.robot.commands.ExampleCommand;
-import frc.robot.commands.TeleopArcadeDrive;
+import frc.robot.commands.ArcadeDrive;
 import frc.robot.subsystems.RomiDrivetrain;
 
 /**
@@ -51,8 +51,8 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     drivetrain.setDefaultCommand(
-      new TeleopArcadeDrive(drivetrain,
-        () ->  controller.getRawAxis(1),
+      new ArcadeDrive(drivetrain,
+        () -> -controller.getRawAxis(1),
         () -> -controller.getRawAxis(3)));
 
     joystickButton.whenPressed(new DriveForwardSecs(drivetrain, 3));

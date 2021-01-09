@@ -12,15 +12,15 @@ import java.util.function.Supplier;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.RomiDrivetrain;
 
-public class TeleopArcadeDrive extends CommandBase {
+public class ArcadeDrive extends CommandBase {
     private RomiDrivetrain drivetrain;
-    private Supplier<Double> xSpeedSupplier;
-    private Supplier<Double> zRotateSupplier;
+    private Supplier<Double> speedSupplier;
+    private Supplier<Double> rotateSupplier;
 
-    public TeleopArcadeDrive(RomiDrivetrain drivetrainIn, Supplier<Double> xSpeedSupplierIn, Supplier<Double> zRotateSupplierIn) {
-        drivetrain = drivetrainIn;
-        xSpeedSupplier = xSpeedSupplierIn;
-        zRotateSupplier = zRotateSupplierIn;
+    public ArcadeDrive(RomiDrivetrain drivetrain, Supplier<Double> speedSupplier, Supplier<Double> rotateSupplier) {
+        this.drivetrain = drivetrain;
+        this.speedSupplier = speedSupplier;
+        this.rotateSupplier = rotateSupplier;
 
         addRequirements(drivetrain);
     }
@@ -33,7 +33,7 @@ public class TeleopArcadeDrive extends CommandBase {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        drivetrain.arcadeDrive(xSpeedSupplier.get(), zRotateSupplier.get());
+        drivetrain.arcadeDrive(speedSupplier.get(), rotateSupplier.get());
     }
 
     // Called once the command ends or is interrupted.
