@@ -10,7 +10,11 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.speedcontrollers.FeedforwardSpeedController;
+import frc.robot.speedcontrollers.PIDFSpeedController;
+import frc.robot.speedcontrollers.PIDSpeedController;
 
 public class RomiDrivetrain extends SubsystemBase {
   private static final double kCountsPerRevolution = 1440.0;
@@ -18,51 +22,136 @@ public class RomiDrivetrain extends SubsystemBase {
 
   // The Romi has the left and right motors set to
   // PWM channels 0 and 1 respectively
-  private final Spark m_leftMotor = new Spark(0);
-  private final Spark m_rightMotor = new Spark(1);
+  private final Spark leftMotor = new Spark(0);
+  private final Spark rightMotor = new Spark(1);
 
   // The Romi has onboard encoders that are hardcoded
   // to use DIO pins 4/5 and 6/7 for the left and right
-  private final Encoder m_leftEncoder = new Encoder(4, 5);
-  private final Encoder m_rightEncoder = new Encoder(6, 7);
+  private final Encoder leftEncoder = new Encoder(4, 5);
+  private final Encoder rightEncoder = new Encoder(6, 7);
 
-  // Set up the differential drive controller
-  private final DifferentialDrive m_diffDrive = new DifferentialDrive(m_leftMotor, m_rightMotor);
+  private final FeedforwardSpeedController leftFFController;
+  private final FeedforwardSpeedController rightFFController;
+
+  private final PIDSpeedController leftPIDController;
+  private final PIDSpeedController rightPIDController;
+
+  private final PIDFSpeedController leftPIDFController;
+  private final PIDFSpeedController rightPIDFController;
+
+  // Set up the differential drive controllers.
+  private final DifferentialDrive diffDriveRaw;
+  private final DifferentialDrive diffDriveFF;
+  private final DifferentialDrive diffDrivePID;
+  private final DifferentialDrive diffDrivePIDF;
+  private DifferentialDrive activeDiffDrive;
+
+  public enum DiffDriveMode {
+    RAW, FF, PID, PIDF
+  }
 
   /**
    * Creates a new RomiDrivetrain.
    */
   public RomiDrivetrain() {
-    // DifferentialDrive defaults to having the right side flipped
-    // We don't need to do this because the Romi has accounted for this
-    // in firmware/hardware
-    m_diffDrive.setRightSideInverted(false);
+    leftMotor.setInverted(false);
+    rightMotor.setInverted(true);
+
+    // Create the speed controllers used for the various test modes.
+    leftFFController = new FeedforwardSpeedController(leftMotor,   1.20, 0.0400, 1.46, 0.0345);
+    rightFFController = new FeedforwardSpeedController(rightMotor, 1.37 , 0.0397, 1.38, 0.0364);
+
+    leftPIDController = new PIDSpeedController(leftMotor, leftEncoder::getRate, 0.25, 0.0, 0.0);
+    rightPIDController = new PIDSpeedController(rightMotor, rightEncoder::getRate, 0.25, 0.0, 0.0);
+  
+    leftPIDFController = new PIDFSpeedController(leftMotor, leftEncoder::getRate,
+      1.20, 0.0400, 1.46, 0.0345,
+      5.23e-6, 0.0, 0.0);
+    rightPIDFController = new PIDFSpeedController(rightMotor, rightEncoder::getRate,
+      1.37 , 0.0397, 1.38, 0.0364,
+      5.04e-6, 0.0, 0.0);
+
+    // Set up the differential drive controllers for the various test modes.
+    diffDriveRaw = new DifferentialDrive(leftMotor, rightMotor);
+    diffDriveRaw.setRightSideInverted(false);
+
+    diffDriveFF = new DifferentialDrive(leftFFController, rightFFController);
+    diffDriveFF.setRightSideInverted(false);
+
+    diffDrivePID = new DifferentialDrive(leftPIDController, rightPIDController);
+    diffDrivePID.setRightSideInverted(false);
+
+    diffDrivePIDF = new DifferentialDrive(leftPIDFController, rightPIDFController);
+    diffDrivePIDF.setRightSideInverted(false);
+
+    // Default to "raw" mode.
+    setDiffDriveMode(DiffDriveMode.RAW);
+  }
+
+  public void setDiffDriveMode(DiffDriveMode mode) {
+    System.out.println("setDiffDriveMode " + mode.toString());
+    switch (mode) {
+      case RAW:
+        activeDiffDrive = diffDriveRaw;
+        SmartDashboard.putString("controller-mode", "raw");
+        break;
+      case FF:
+        activeDiffDrive = diffDriveFF;
+        SmartDashboard.putString("controller-mode", "FF");
+        break;
+      case PID:
+        activeDiffDrive = diffDrivePID;
+        SmartDashboard.putString("controller-mode", "PID");
+        break;
+      case PIDF:
+        activeDiffDrive = diffDrivePIDF;
+        SmartDashboard.putString("controller-mode", "FF + PID");
+        break;
+    }
+    
     resetEncoders();
   }
 
   public void arcadeDrive(double speed, double rotation) {
-    m_diffDrive.arcadeDrive(-speed, rotation, false);
+    SmartDashboard.putNumber("arcade speed", speed);
+    SmartDashboard.putNumber("arcade rotation", rotation);
+    activeDiffDrive.arcadeDrive(speed, rotation, false);
+
+    // Only the "active" differential drive feeds its speed controllers.
+    // Explicitly feed all of them so nobody starves.
+    diffDriveRaw.feed();
+    diffDriveFF.feed();
+    diffDrivePID.feed();
+    diffDrivePIDF.feed();
   }
 
   public void resetEncoders() {
-    m_leftEncoder.reset();
-    m_rightEncoder.reset();
+    leftEncoder.reset();
+    rightEncoder.reset();
   }
 
   public int getLeftEncoderCount() {
-    return m_leftEncoder.get();
+    return leftEncoder.get();
   }
 
   public int getRightEncoderCount() {
-    return m_rightEncoder.get();
+    return rightEncoder.get();
   }
 
   public double getLeftDistanceInch() {
-    return Math.PI * kWheelDiameterInch * (getLeftEncoderCount() / kCountsPerRevolution);
+    return ticksToInches(getLeftEncoderCount());
   }
 
   public double getRightDistanceInch() {
-    return Math.PI * kWheelDiameterInch * (getRightEncoderCount() / kCountsPerRevolution);
+    return ticksToInches(getRightEncoderCount());
+  }
+
+  public double getLeftRateInches() {
+    return ticksToInches(leftEncoder.getRate());
+  }
+
+  public double getRightRateInches() {
+    return ticksToInches(rightEncoder.getRate());
   }
 
   @Override
@@ -73,5 +162,10 @@ public class RomiDrivetrain extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
+  }
+
+  // Convert wheel encoder ticks to inches based on wheel physical dimensions.
+  private double ticksToInches(double ticks) {
+    return Math.PI * kWheelDiameterInch * (ticks / kCountsPerRevolution);
   }
 }

@@ -12,8 +12,8 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.DriveForward;
-import frc.robot.commands.DriveForwardSecs;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.ArcadeDrive;
 import frc.robot.subsystems.RomiDrivetrain;
@@ -32,16 +32,20 @@ public class RobotContainer {
 
   // Assumes a gamepad plugged into channel 0.
   private final Joystick controller = new Joystick(0);
+  private final JoystickButton buttonA = new JoystickButton(controller, XboxController.Button.kA.value);
+  private final JoystickButton buttonB = new JoystickButton(controller, XboxController.Button.kB.value);
+  private final JoystickButton buttonX = new JoystickButton(controller, XboxController.Button.kX.value);
+  private final JoystickButton buttonY = new JoystickButton(controller, XboxController.Button.kY.value);
   private final JoystickButton povUp = new JoystickButton(controller, 12);
+
   // private final JoystickButton povDown = new JoystickButton(controller, 13);
 
   private final ExampleCommand autoCommand = new ExampleCommand(drivetrain);
 
   /**
-   * The container for the robot.  Contains subsystems, OI devices, and commands.
+   * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    // Configure the button bindings
     configureButtonBindings();
   }
  
@@ -52,13 +56,18 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    drivetrain.setDefaultCommand(
-      new ArcadeDrive(drivetrain,
+    drivetrain.setDefaultCommand(new ArcadeDrive(drivetrain,
         () -> -controller.getRawAxis(1),
-        () -> -controller.getRawAxis(3)));
+        () ->  controller.getRawAxis(3)
+    ));
 
-        povUp.whenPressed(new DriveForward(drivetrain, 12.0));
-      }
+    povUp.whenPressed(new DriveForward(drivetrain, 12.0));
+
+    buttonA.whenPressed(() -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.PIDF));
+    buttonB.whenPressed(() -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.PID));
+    buttonX.whenPressed(() -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.FF));
+    buttonY.whenPressed(() -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.RAW));
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
