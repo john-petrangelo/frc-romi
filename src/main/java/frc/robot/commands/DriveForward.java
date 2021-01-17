@@ -19,6 +19,7 @@ public class DriveForward extends CommandBase {
         this.distance = distance;
 
         addRequirements(drivetrain);
+        setName("DriveForward " + distance);
     }
 
     // Called when the command is initially scheduled.
