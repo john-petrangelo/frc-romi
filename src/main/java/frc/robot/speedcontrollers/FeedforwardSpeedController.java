@@ -21,7 +21,6 @@ public class FeedforwardSpeedController implements SpeedController {
 
     @Override
     public void set(double speed) {
-
         speed *= 100;
 
         if (speed > 0.0) {

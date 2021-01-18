@@ -54,8 +54,6 @@ public class RomiDrivetrain extends SubsystemBase {
    * Creates a new RomiDrivetrain.
    */
   public RomiDrivetrain() {
-    leftMotor.setInverted(false);
-    rightMotor.setInverted(true);
 
     // Create the speed controllers used for the various test modes.
     leftFFController = new FeedforwardSpeedController(leftMotor,   1.20, 0.0400, 1.46, 0.0345);
@@ -73,16 +71,9 @@ public class RomiDrivetrain extends SubsystemBase {
 
     // Set up the differential drive controllers for the various test modes.
     diffDriveRaw = new DifferentialDrive(leftMotor, rightMotor);
-    diffDriveRaw.setRightSideInverted(false);
-
     diffDriveFF = new DifferentialDrive(leftFFController, rightFFController);
-    diffDriveFF.setRightSideInverted(false);
-
     diffDrivePID = new DifferentialDrive(leftPIDController, rightPIDController);
-    diffDrivePID.setRightSideInverted(false);
-
     diffDrivePIDF = new DifferentialDrive(leftPIDFController, rightPIDFController);
-    diffDrivePIDF.setRightSideInverted(false);
 
     // Default to "raw" mode.
     setDiffDriveMode(DiffDriveMode.RAW);
