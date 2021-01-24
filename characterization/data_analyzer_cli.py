@@ -42,6 +42,7 @@ PREPARED_COS_COL = 5
 
 PREPARED_MAX_COL = PREPARED_ACC_COL
 
+filename = "characterization-data20210117-2330.json"
 
 class Tests(Enum):
     ARM = "Arm"
@@ -424,9 +425,8 @@ class Analyzer:
         self.prepared_data = None
 
     def get_file(self):
-        # TODO Should be a parameter
-        filename = "characterization-data20210117-2330.json"
         try:
+            # TODO Filename should be a parameter
             with open(filename) as dataFile:
                 data = json.load(dataFile)
 
@@ -919,6 +919,7 @@ def main(project_dir):
     # Print report header
     print(f"Robot characterization report for {analyzer.test}")
     print(datetime.now().strftime("Analysis run on %b %d, %Y at %H:%M:%S"))
+    print(f"Using data from {filename}")
     print()
 
     # Print results for each test subset
