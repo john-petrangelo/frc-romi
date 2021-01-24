@@ -21,8 +21,6 @@ public class FeedforwardSpeedController implements SpeedController {
 
     @Override
     public void set(double speed) {
-        speed *= 100;
-
         if (speed > 0.0) {
             other.setVoltage(fwdFF.calculate(speed));
         } else {
