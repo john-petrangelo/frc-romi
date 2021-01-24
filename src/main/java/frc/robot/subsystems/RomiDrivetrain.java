@@ -8,6 +8,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.LinearFilter;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,8 +18,9 @@ import frc.robot.speedcontrollers.PIDFSpeedController;
 import frc.robot.speedcontrollers.PIDSpeedController;
 
 public class RomiDrivetrain extends SubsystemBase {
-  private static final double kCountsPerRevolution = 1440.0;
-  private static final double kWheelDiameterInch = 2.75;
+  private static final double COUNTS_PER_REVOLUTION = 1440.0;
+  private static final double WHEEL_DIAMETER_INCHES = 2.75;
+  private static final double MAX_SPEED = 20.0;
 
   // The Romi has the left and right motors set to
   // PWM channels 0 and 1 respectively
@@ -29,6 +31,10 @@ public class RomiDrivetrain extends SubsystemBase {
   // to use DIO pins 4/5 and 6/7 for the left and right
   private final Encoder leftEncoder = new Encoder(4, 5);
   private final Encoder rightEncoder = new Encoder(6, 7);
+
+  // Keep a filter for each side's driving speed.
+  private LinearFilter leftDriveSpeed = LinearFilter.singlePoleIIR(0.1, 0.02);
+  private LinearFilter rightDriveSpeed = LinearFilter.singlePoleIIR(0.1, 0.02);
 
   private final FeedforwardSpeedController leftFFController;
   private final FeedforwardSpeedController rightFFController;
@@ -54,26 +60,34 @@ public class RomiDrivetrain extends SubsystemBase {
    * Creates a new RomiDrivetrain.
    */
   public RomiDrivetrain() {
+    leftEncoder.setDistancePerPulse(ticksToInches(1));
+    rightEncoder.setDistancePerPulse(ticksToInches(1));
 
     // Create the speed controllers used for the various test modes.
-    leftFFController = new FeedforwardSpeedController(leftMotor,   1.20, 0.0400, 1.46, 0.0345);
-    rightFFController = new FeedforwardSpeedController(rightMotor, 1.37 , 0.0397, 1.38, 0.0364);
+    // leftFFController = new FeedforwardSpeedController(leftMotor,   1.20, 0.0400, 1.46, 0.0345);
+    // rightFFController = new FeedforwardSpeedController(rightMotor, 1.37 , 0.0397, 1.38, 0.0364);
+    leftFFController = new FeedforwardSpeedController(leftMotor,   1.18, 0.17, 1.81, 0.134);
+    rightFFController = new FeedforwardSpeedController(rightMotor, 1.41, 0.149, 1.3, 0.16);
 
     leftPIDController = new PIDSpeedController(leftMotor, leftEncoder::getRate, 0.25, 0.0, 0.0);
     rightPIDController = new PIDSpeedController(rightMotor, rightEncoder::getRate, 0.25, 0.0, 0.0);
   
     leftPIDFController = new PIDFSpeedController(leftMotor, leftEncoder::getRate,
-      1.20, 0.0400, 1.46, 0.0345,
-      5.23e-6, 0.0, 0.0);
+      1.18, 0.17, 1.81, 0.134,
+      0.0003400, 0.0002240);
     rightPIDFController = new PIDFSpeedController(rightMotor, rightEncoder::getRate,
-      1.37 , 0.0397, 1.38, 0.0364,
-      5.04e-6, 0.0, 0.0);
+      1.41, 0.149, 1.3, 0.16,
+      0.0004690, 0.0000757);
 
     // Set up the differential drive controllers for the various test modes.
     diffDriveRaw = new DifferentialDrive(leftMotor, rightMotor);
     diffDriveFF = new DifferentialDrive(leftFFController, rightFFController);
     diffDrivePID = new DifferentialDrive(leftPIDController, rightPIDController);
     diffDrivePIDF = new DifferentialDrive(leftPIDFController, rightPIDFController);
+
+    diffDriveFF.setMaxOutput(MAX_SPEED);
+    diffDrivePID.setMaxOutput(MAX_SPEED);
+    diffDrivePIDF.setMaxOutput(MAX_SPEED);
 
     // Default to "raw" mode.
     setDiffDriveMode(DiffDriveMode.RAW);
@@ -114,6 +128,11 @@ public class RomiDrivetrain extends SubsystemBase {
     diffDriveFF.feed();
     diffDrivePID.feed();
     diffDrivePIDF.feed();
+
+    
+    // Update the drive speed filters and report to the SmartDashboard.
+    SmartDashboard.putNumber("left-speed", leftDriveSpeed.calculate(getLeftRate()));
+    SmartDashboard.putNumber("right-speed", rightDriveSpeed.calculate(getRightRate()));
   }
 
   public void resetEncoders() {
@@ -145,6 +164,14 @@ public class RomiDrivetrain extends SubsystemBase {
     return ticksToInches(rightEncoder.getRate());
   }
 
+  public double getLeftRate() {
+    return leftEncoder.getRate();
+  }
+
+  public double getRightRate() {
+    return rightEncoder.getRate();
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -157,6 +184,6 @@ public class RomiDrivetrain extends SubsystemBase {
 
   // Convert wheel encoder ticks to inches based on wheel physical dimensions.
   private double ticksToInches(double ticks) {
-    return Math.PI * kWheelDiameterInch * (ticks / kCountsPerRevolution);
+    return Math.PI * WHEEL_DIAMETER_INCHES * (ticks / COUNTS_PER_REVOLUTION);
   }
 }
