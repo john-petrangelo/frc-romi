@@ -28,7 +28,7 @@ import java.util.ArrayList;
 
 public class RobotCharacterization extends TimedRobot {
 
-  static private double ENCODER_EDGES_PER_REV = 1440 / 4.;
+  static private double ENCODER_EDGES_PER_REV = 4 * 1440 / 4.;
   static private double GEARING = 1;
   
   private double encoderConstant = (1 / GEARING) * (1 / ENCODER_EDGES_PER_REV);
@@ -107,6 +107,8 @@ public class RobotCharacterization extends TimedRobot {
 
   @Override
   public void robotInit() {
+    if (!isReal()) SmartDashboard.putData(new SimEnabler());
+
     stick = new Joystick(0);
     
     // Create drivetrain.
