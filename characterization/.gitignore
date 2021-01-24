@@ -1,1 +1,3 @@
-characterization-data*.json
+*.json
+*.csv
+*.xlsx
