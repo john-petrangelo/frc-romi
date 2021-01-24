@@ -1,24 +1,20 @@
 # This program is a modified version of the analyzer from frc-characterization.
 # The GUI elements have been removed and a CLI interface has been added.
 
+import argparse
 import copy
-from datetime import datetime
 import json
 import logging
 import os
+import sys
+from datetime import datetime
 from enum import Enum
 
 import control as ctrl
 import frccontrol as frc_ctrl
-import pint
-
 import numpy as np
+import pint
 import statsmodels.api as sm
-
-# Setup the logger.
-logger = logging.getLogger("logger")
-log_format = "%(asctime)s %(levelname)-8s: %(message)s"
-logging.basicConfig(level=logging.INFO, format=log_format)
 
 # These are the indices of data stored in the json file
 TIME_COL = 0
@@ -42,7 +38,11 @@ PREPARED_COS_COL = 5
 
 PREPARED_MAX_COL = PREPARED_ACC_COL
 
-filename = "characterization-data20210117-2330.json"
+# Set up logging
+log_format = "%(asctime)s %(levelname)-8s: %(message)s"
+logging.basicConfig(level=logging.INFO, format=log_format)
+logger = logging.getLogger("logger")
+
 
 class Tests(Enum):
     ARM = "Arm"
@@ -367,10 +367,9 @@ def calc_gains_vel(kv, ka, qv, effort, period, velocity_delay):
 
 
 class Analyzer:
-    def __init__(self, project_dir):
+    def __init__(self):
 
         self.window_size = 8
-        self.project_path = project_dir
         self.motion_threshold = 0.2
         self.subset = "Forward Left"
         self.units = ""
@@ -424,11 +423,17 @@ class Analyzer:
         self.stored_data = None
         self.prepared_data = None
 
-    def get_file(self):
+    def get_file(self, filename):
         try:
-            # TODO Filename should be a parameter
-            with open(filename) as dataFile:
-                data = json.load(dataFile)
+            if filename:
+                try:
+                    with open(filename) as dataFile:
+                        data = json.load(dataFile)
+                except IOError as e:
+                    logger.error(f"Failed to open data file: {e}")
+                    return False
+            else:
+                data = json.load(sys.stdin)
 
             try:
                 # Transform the data into a numpy array to make it easier to use
@@ -442,17 +447,18 @@ class Analyzer:
                 self.units = data["units"]
                 self.test = data["test"]
                 self.units_per_rot = float(data["unitsPerRotation"])
+                return True
             except Exception as e:
                 logger.error(
                     "Error! The structure of the data JSON was not recognized.\n"
                     + "Details\n"
                     + repr(e),
                 )
-                return
+                return False
         except Exception as e:
             logger.error(
                 "Error! The JSON file could not be loaded.\n" + "Details:\n" + repr(e))
-            return
+            return False
 
     def run_analysis(self):
         self.prepared_data = self.prepare_data(self.stored_data, window=self.window_size)
@@ -912,14 +918,27 @@ class Analyzer:
         )
 
 
-def main(project_dir):
-    analyzer = Analyzer(project_dir)
-    analyzer.get_file()
+def main(argv, project_dir):
+    # Parse the commandline arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("filename", help="name of the data file to analyze (default stdin)", nargs="?", default=None)
+    parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
+    args = parser.parse_args()
+
+    # Setup the logger
+    if args.verbose:
+        logger.setLevel(logging.DEBUG)
+
+    analyzer = Analyzer()
+    got_file = analyzer.get_file(args.filename)
+
+    if not got_file:
+        return
 
     # Print report header
     print(f"Robot characterization report for {analyzer.test}")
     print(datetime.now().strftime("Analysis run on %b %d, %Y at %H:%M:%S"))
-    print(f"Using data from {filename}")
+    print(f"Using data from {args.filename}")
     print(f"There are {analyzer.units_per_rot:.3} {analyzer.units.lower()} per rotation")
     print()
 
@@ -934,8 +953,4 @@ def main(project_dir):
 
 
 if __name__ == "__main__":
-    main(os.getcwd())
-
-# TODO Add CLI options
-# --debug       enable debug logging
-# -f filename   name of data file to read
+    main(sys.argv, os.getcwd())
