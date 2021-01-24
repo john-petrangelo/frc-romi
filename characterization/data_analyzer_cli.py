@@ -920,6 +920,7 @@ def main(project_dir):
     print(f"Robot characterization report for {analyzer.test}")
     print(datetime.now().strftime("Analysis run on %b %d, %Y at %H:%M:%S"))
     print(f"Using data from {filename}")
+    print(f"There are {analyzer.units_per_rot:.3} {analyzer.units.lower()} per rotation")
     print()
 
     # Print results for each test subset
@@ -929,7 +930,7 @@ def main(project_dir):
         print(analyzer.report_parameters())
 
     # Print results for track width
-    print(f"Track width: {analyzer.track_width:5.3g} {analyzer.units:10}    (TODO not quite right yet...)")
+    print(f"Track width: {analyzer.track_width:.3g} {analyzer.units.lower()}    (TODO not quite right yet...)")
 
 
 if __name__ == "__main__":
