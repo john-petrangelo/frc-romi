@@ -17,8 +17,7 @@ import statsmodels.api as sm
 
 # Setup the logger.
 logger = logging.getLogger("logger")
-log_format = "%(asctime)s:%(msecs)03d %(levelname)-8s: %(name)-20s: %(message)s"
-logger.setLevel(logging.ERROR)
+log_format = "%(asctime)s %(levelname)-8s: %(message)s"
 logging.basicConfig(level=logging.INFO, format=log_format)
 
 # These are the indices of data stored in the json file
@@ -438,17 +437,11 @@ class Analyzer:
                     data[k] = np.array(data[k]).transpose()
 
                 self.stored_data = data
-                logger.info("Loaded Data")
+                logger.debug("Loaded Data")
 
                 self.units = data["units"]
                 self.test = data["test"]
                 self.units_per_rot = float(data["unitsPerRotation"])
-                logger.info(
-                    "Units: %s, Test: %s, Units per rotation: %.3f",
-                    self.units,
-                    self.test,
-                    self.units_per_rot,
-                )
             except Exception as e:
                 logger.error(
                     "Error! The structure of the data JSON was not recognized.\n"
@@ -482,7 +475,7 @@ class Analyzer:
         self.calc_gains()
 
     def run_analysis_drive(self):
-        logger.info("Running drive analysis")
+        logger.debug("Running drive analysis")
         ks, kv, ka, r_square = calc_fit(
             *self.prepared_data[self.subset], self.test
         )
@@ -498,7 +491,7 @@ class Analyzer:
             self.track_width = "N/A"
 
     def run_analysis_elevator(self):
-        logger.info("Running elevator analysis")
+        logger.debug("Running elevator analysis")
         kg, kfr, kv, ka, rsquare = calc_fit(
             *self.prepared_data[self.subset], self.test
         )
@@ -510,7 +503,7 @@ class Analyzer:
         self.r_square = float("%.3g" % rsquare)
 
     def run_analysis_arm(self):
-        logger.info("Running arm analysis")
+        logger.debug("Running arm analysis")
         ks, kv, ka, kcos, rsquare = calc_fit(
             *self.prepared_data[self.subset], self.test
         )
@@ -522,7 +515,7 @@ class Analyzer:
         self.r_square = float("%.3g" % rsquare)
 
     def run_analysis_simple(self):
-        logger.info("Running simple analysis")
+        logger.debug("Running simple analysis")
         ks, kv, ka, rsquare = calc_fit(
             *self.prepared_data[self.subset], self.test
         )
@@ -533,7 +526,7 @@ class Analyzer:
         self.r_square = float("%.3g" % rsquare)
 
     def calc_gains(self):
-        logger.info("Calculating PID gains")
+        logger.debug("Calculating PID gains")
         period = (
             self.period
             if not self.has_follower
@@ -854,7 +847,7 @@ class Analyzer:
         intercept, Kv (the regression coefficient of velocity), and Ka (the regression
         coefficient of acceleration).
         """
-        logger.info("Preparing data")
+        logger.debug("Preparing data")
 
         # create a copy so original data doesn't get changed
         data = copy.deepcopy(og_data)
