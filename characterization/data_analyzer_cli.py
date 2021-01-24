@@ -933,3 +933,7 @@ def main(project_dir):
 
 if __name__ == "__main__":
     main(os.getcwd())
+
+# TODO Add CLI options
+# --debug       enable debug logging
+# -f filename   name of data file to read
