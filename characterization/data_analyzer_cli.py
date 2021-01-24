@@ -904,12 +904,12 @@ class Analyzer:
 
     def report_parameters(self):
         subset = self.subset.split(" ")
-        return f'''\
-           +--------------+-----------------+-----------------+-----------------+------------------+
-{subset[0]:10} | Feed forward |  kS: {self.ks:9.3g}  |  kV: {self.kv:9.3g}  |  kA: {self.ka:9.3g}  |  R^2: {self.r_square:9.3g}  |
-{subset[1]:10} | PID Feedback |  kP: {self.kp:9.3g}  |  kD: {self.kd:9.3g}  |                 |                  |
-           +--------------+-----------------+-----------------+-----------------+------------------+
-'''
+        return (
+            f"         +--------------+-----------------+-----------------+-----------------+------------------+\n"
+            f"{subset[0]:8} | Feed forward |  kS: {self.ks:9.3g}  |  kV: {self.kv:9.3g}  |  kA: {self.ka:9.3g}  |  R^2: {self.r_square:9.3g}  |\n"
+            f"{subset[1]:8} | PID Feedback |  kP: {self.kp:9.3g}  |  kD: {self.kd:9.3g}  |                 |                  |\n"
+            f"         +--------------+-----------------+-----------------+-----------------+------------------+\n"
+        )
 
 
 def main(project_dir):
