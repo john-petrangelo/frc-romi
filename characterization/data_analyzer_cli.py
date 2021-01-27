@@ -83,17 +83,6 @@ subsets = [
     "Backward Combined",
 ]
 
-presetChoices = {
-    "Default",
-    "WPILib (2020-)",
-    "WPILib (Pre-2020)",
-    "Talon FX",
-    "Talon SRX (2020-)",
-    "Talon SRX (Pre-2020)",
-    "Spark MAX (brushless)",
-    "Spark MAX (brushed)",
-}
-
 directions = {"Combined", "Forward", "Backward"}
 
 loopTypes = {"Position", "Velocity"}
@@ -369,59 +358,60 @@ def calc_gains_vel(kv, ka, qv, effort, period, velocity_delay):
 class Analyzer:
     def __init__(self):
 
+        # Values read from data file
+        self.units = ""
+        self.units_per_rot = 0.0
+        self.test = ""
+
+        # Feed forward analysis parameters
         self.window_size = 8
         self.motion_threshold = 0.2
-        self.subset = "Forward Left"
-        self.units = ""
-        self.track_width = "N/A"
 
-        self.qp = 1.0
-        self.qv = 1.5
-        self.max_effort = 7.0
+        # Feedback analysis parameters
+        self.gain_units_preset = "Default"
 
-        self.period = 0.02
-
+        self.controller_period_sec = 0.02
         self.max_controller_output = 12.0
 
-        self.controller_time_normalized = True
-
+        self.time_normalized_controller = True
+        self.controller_type = "Onboard"
         self.measurement_delay = 0.0
 
-        self.gearing = 1.0
-
-        self.controller_type = "Onboard"
-
+        self.post_encoder_gearing = 1.0
         self.encoder_epr = 4096
 
         self.has_follower = False
-
         self.follower_period = 0.01
 
-        self.gain_units_preset = "Default"
+        self.max_acceptable_error_p = 1.0
+        self.max_acceptable_error_v = 1.5
+        self.max_acceptable_control_effort = 7.0
 
         self.loop_type = "Velocity"
+
+        self.convert_gains = False
 
         # Feed forward results
         self.ks = 0.0
         self.kv = 0.0
         self.ka = 0.0
+        self.kg = 0.0
         self.kcos = 0.0
         self.r_square = 0.0
 
         # PID Feedback results
         self.kp = 0.0
         self.kd = 0.0
-        self.kg = 0.0
-        self.kcos = 0.0
 
-        self.test = ""
+        # Track width results
+        self.track_width = "N/A"
 
-        self.units_per_rot = 0.0
-
-        self.convert_gains = False
-
+        # Internal state
         self.stored_data = None
         self.prepared_data = None
+
+        self.subset = ""
+
 
     def get_file(self, filename):
         try:
@@ -534,7 +524,7 @@ class Analyzer:
     def calc_gains(self):
         logger.debug("Calculating PID gains")
         period = (
-            self.period
+            self.controller_period_sec
             if not self.has_follower
             else self.follower_period
         )
@@ -543,9 +533,9 @@ class Analyzer:
             kp, kd = calc_gains_pos(
                 self.kv,
                 self.ka,
-                self.qp,
-                self.qv,
-                self.max_effort,
+                self.max_acceptable_error_p,
+                self.max_acceptable_error_v,
+                self.max_acceptable_control_effort,
                 period,
                 self.measurement_delay,
             )
@@ -553,8 +543,8 @@ class Analyzer:
             kp, kd = calc_gains_vel(
                 self.kv,
                 self.ka,
-                self.qv,
-                self.max_effort,
+                self.max_acceptable_error_v,
+                self.max_acceptable_control_effort,
                 period,
                 self.measurement_delay,
             )
@@ -564,8 +554,8 @@ class Analyzer:
         kd = kd / 12 * self.max_controller_output
 
         # Rescale kD if not time-normalized
-        if not self.controller_time_normalized:
-            kd = kd / self.period
+        if not self.time_normalized_controller:
+            kd = kd / self.controller_period_sec
 
         # Get correct conversion factor for rotations
         units = Units(self.units)
@@ -577,13 +567,13 @@ class Analyzer:
         # Convert to controller-native units if desired
         if self.convert_gains:
             if self.controller_type == "Talon":
-                kp = kp * rotation / (self.encoder_epr * self.gearing)
-                kd = kd * rotation / (self.encoder_epr * self.gearing)
+                kp = kp * rotation / (self.encoder_epr * self.post_encoder_gearing)
+                kd = kd * rotation / (self.encoder_epr * self.post_encoder_gearing)
                 if self.loop_type == "Velocity":
                     kp = kp * 10
             if self.controller_type == "Spark":
-                kp = kp / self.gearing
-                kd = kd / self.gearing
+                kp = kp / self.post_encoder_gearing
+                kd = kd / self.post_encoder_gearing
                 if self.loop_type == "Velocity":
                     kp = kp / 60
 
@@ -614,24 +604,24 @@ class Analyzer:
 
         if self.gain_units_preset == "WPILib (2020-)":
             self.max_controller_output = 12
-            self.period = 0.02
-            self.controller_time_normalized = True
+            self.controller_period_sec = 0.02
+            self.time_normalized_controller = True
             self.controller_type = "Onboard"
             # Note that the user will need to remember to set this if the onboard controller is getting
             # delayed measurements.
             set_measurement_delay(0)
         elif self.gain_units_preset == "WPILib (Pre-2020)":
             self.max_controller_output = 1
-            self.period = 0.05
-            self.controller_time_normalized = False
+            self.controller_period_sec = 0.05
+            self.time_normalized_controller = False
             self.controller_type = "Onboard"
             # Note that the user will need to remember to set this if the onboard controller is getting
             # delayed measurements.
             set_measurement_delay(0)
         elif self.gain_units_preset == "Talon FX":
             self.max_controller_output = 1
-            self.period = 0.001
-            self.controller_time_normalized = True
+            self.controller_period_sec = 0.001
+            self.time_normalized_controller = True
             self.controller_type = "Talon"
             # https://phoenix-documentation.readthedocs.io/en/latest/ch14 MCSensor.html#changing-velocity-measurement-parameters
             # 100 ms sampling period + a moving average window size of 64
@@ -640,8 +630,8 @@ class Analyzer:
             set_measurement_delay(81.5)
         elif self.gain_units_preset == "Talon SRX (2020-)":
             self.max_controller_output = 1
-            self.period = 0.001
-            self.controller_time_normalized = True
+            self.controller_period_sec = 0.001
+            self.time_normalized_controller = True
             self.controller_type = "Talon"
             # https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#changing-velocity-measurement-parameters
             # 100 ms sampling period + a moving average window size of 64
@@ -650,8 +640,8 @@ class Analyzer:
             set_measurement_delay(81.5)
         elif self.gain_units_preset == "Talon SRX (Pre-2020)":
             self.max_controller_output = 1023
-            self.period = 0.001
-            self.controller_time_normalized = False
+            self.controller_period_sec = 0.001
+            self.time_normalized_controller = False
             self.controller_type = "Talon"
             # https://phoenix-documentation.readthedocs.io/en/latest/ch14_MCSensor.html#changing-velocity-measurement-parameters
             # 100 ms sampling period + a moving average window size of 64 (i.e. a 64-tap FIR) = 100/2 ms + (64-1)/2 ms = 81.5 ms.
@@ -659,16 +649,16 @@ class Analyzer:
             set_measurement_delay(81.5)
         elif self.gain_units_preset == "Spark MAX (brushless)":
             self.max_controller_output = 1
-            self.period.set = 0.001
-            self.controller_time_normalized = False
+            self.controller_period_sec.set = 0.001
+            self.time_normalized_controller = False
             self.controller_type = "Spark"
             # According to a Rev employee on the FRC Discord the window size is 40 so delay = (40-1)/2 ms = 19.5 ms.
             # See above for more info on moving average delays.
             set_measurement_delay(19.5)
         elif self.gain_units_preset == "Spark MAX (brushed)":
             self.max_controller_output = 1
-            self.period = 0.001
-            self.controller_time_normalized = False
+            self.controller_period_sec = 0.001
+            self.time_normalized_controller = False
             self.controller_type = "Spark"
             # https://www.revrobotics.com/content/sw/max/sw-docs/cpp/classrev_1_1_c_a_n_encoder.html#a7e6ce792bc0c0558fb944771df572e6a
             # 64-tap FIR = (64-1)/2 ms = 31.5 ms delay.
@@ -676,8 +666,8 @@ class Analyzer:
             set_measurement_delay(31.5)
         else:
             self.max_controller_output = 12
-            self.period = 0.02
-            self.controller_time_normalized = True
+            self.controller_period_sec = 0.02
+            self.time_normalized_controller = True
             self.controller_type = "Onboard"
             set_measurement_delay(0)
 
@@ -923,6 +913,61 @@ def main(argv, project_dir):
     parser = argparse.ArgumentParser()
     parser.add_argument("filename", help="name of the data file to analyze (default stdin)", nargs="?", default=None)
     parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
+
+    feedforward_group = parser.add_argument_group("Feedforward analysis arguments")
+    feedforward_group.add_argument("--window-size", help="Acceleration smoothing window size (number of samples, default 8)", default=8)
+    feedforward_group.add_argument("--motion-threshold", help="Motion threshold (units per second, default 0.200)", default=0.2)
+
+    feedback_group = parser.add_argument_group("Feedback analysis arguments")
+    feedback_group.add_argument("--gain-units-preset", help="Gain units preset (default \"Default\")",
+                                default="Default", choices=[
+                                    "Default",
+                                    "WPILib (2020-)",
+                                    "WPILib (Pre-2020)",
+                                    "Talon FX",
+                                    "Talon SRX (2020-)",
+                                    "Talon SRX (Pre-2020)",
+                                    "Spark MAX (brushless)",
+                                    "Spark MAX (brushed)",
+                                ])
+
+    feedback_group.add_argument("--controller-period", help="Controller period (seconds, default 0.020)", default=0.020)
+    feedback_group.add_argument("--max-controller-output",
+                                help="Maximum controller output volts (default 12.0)", default=12.0)
+    feedback_group.add_argument("--time-normalized-controller",
+                                help="Is a time-normalized controller (default)", default=True, action="store_true")
+    feedback_group.add_argument("--no-time-normalized-controller",
+                                help="Is NOT a time-normalized controller", dest="time_normalized_controller", action="store_false")
+    feedback_group.add_argument("--controller-type",
+                                help="Controller type (default=\"Onboard\")", default="Onboard",
+                                choices=["Onboard", "Talon", "Spark"])
+
+    feedback_group.add_argument("--measurement-delay", help="Measurement delay (ms, default=0.0)", default=0.0)
+    feedback_group.add_argument("--post-encoder-gearing", help="Post-encoder gearing ratio (default 1.0)", default=1.0)
+    feedback_group.add_argument("--encoder-epr", help="Encoder edges per rotation (default 4096)", default=4096)
+
+    feedback_group.add_argument("--has-follower", help="Has a follower (default no follower)",
+                                default=False, action="store_true")
+    feedback_group.add_argument("--follower-period", help="Follower update period (seconds, default 0.010",
+                                default=0.010)
+
+    feedback_group.add_argument("--max-acceptable-error-position",
+                                help="Maximum acceptable position error (units), default 1", default=1,
+                                dest="max_acceptable_error_p")
+    feedback_group.add_argument("--max-acceptable-error-velocity",
+                                help="Maximum acceptable velocity error (units per second, default 1.5)", default=1.5,
+                                dest="max_acceptable_error_v")
+    feedback_group.add_argument("--max-acceptable-control-effort",
+                                help="Maximum acceptable control effort (volts, default 7)", default=7)
+
+    feedback_group.add_argument("--loop-type", help="Control loop type (default Velocity)", default="Velocity",
+                                choices=["Velocity", "Position"])
+
+    feedback_group.add_argument("--convert-gains", help="Should convert gains (default don't convert gains)",
+                                default=False, action="store_true")
+
+
+    # Parse the arguments
     args = parser.parse_args()
 
     # Setup the logger
