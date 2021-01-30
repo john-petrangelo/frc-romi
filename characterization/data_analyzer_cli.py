@@ -496,8 +496,8 @@ class Analyzer:
             ).tolist()
 
         # trim quasi data before computing acceleration
-        sf_trim = Analyzer.trim_quasi_test_data(data["slow-forward"])
-        sb_trim = Analyzer.trim_quasi_test_data(data["slow-backward"])
+        sf_trim = self.trim_quasi_test_data(data["slow-forward"])
+        sb_trim = self.trim_quasi_test_data(data["slow-backward"])
 
         if sf_trim is None or sb_trim is None:
             return [None] * 8
