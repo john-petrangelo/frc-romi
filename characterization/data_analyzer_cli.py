@@ -143,6 +143,9 @@ class Analyzer:
         self.prepared_data = None
         self.subset = None
 
+        # Stored results for all analyses run so far
+        self.saved_results = {}
+
     def get_file(self, filename):
         try:
             if filename:
@@ -215,6 +218,12 @@ class Analyzer:
             self.track_width = Analyzer.calc_track_width(self.stored_data["track-width"])
         else:
             self.track_width = "N/A"
+
+        self.saved_results[self.subset] = {
+            "ks": self.ks,
+            "kv": self.kv,
+            "ka": self.ka,
+        }
 
     def run_analysis_elevator(self):
         logger.debug("Running elevator analysis")
@@ -310,7 +319,11 @@ class Analyzer:
         self.kp = float("%.3g" % kp)
         self.kd = float("%.3g" % kd)
 
-    # TODO This is never called, look for presetGains in original.
+        # Store results for all analyses run so far
+        self.saved_results[self.subset]["kp"] = self.kp
+        self.saved_results[self.subset]["kd"] = self.kd
+
+        # TODO This is never called, look for presetGains in original.
     def preset_gains(self):
         def set_measurement_delay(delay):
             self.measurement_delay = 0 if self.loop_type == "Position" else delay
@@ -595,8 +608,8 @@ class Analyzer:
                 ).tolist()
 
             # trim quasi data before computing acceleration
-            sf_trim = Analyzer.trim_quasi_test_data(data["slow-forward"])
-            sb_trim = Analyzer.trim_quasi_test_data(data["slow-backward"])
+            sf_trim = Analyzer.trim_quasi_test_data(self, data["slow-forward"])
+            sb_trim = Analyzer.trim_quasi_test_data(self, data["slow-backward"])
 
             if sf_trim is None or sb_trim is None:
                 return None, None, None, None
@@ -767,7 +780,7 @@ class Analyzer:
         accel = np.concatenate((qu[PREPARED_ACC_COL], step[PREPARED_ACC_COL]))
         volts = np.concatenate((qu[PREPARED_V_COL], step[PREPARED_V_COL]))
 
-        test = Tests(test)
+        test = Tests(test)sim
         if test == Tests.ELEVATOR:
             fit = Analyzer.ols(vel, accel, np.ones(vel.size), volts)
             ks, kv, ka, kg = fit.params
@@ -970,6 +983,19 @@ def parse_args():
     return parser.parse_args()
 
 
+def gen_java_code(saved_results):
+    fl = saved_results["Forward Left"]
+    bl = saved_results["Backward Left"]
+    fr = saved_results["Forward Right"]
+    br = saved_results["Backward Right"]
+    return (
+        f"final Characteristics c = new Characteristics(\n"
+        f"    {fl['ks']:.3g}, {fl['kv']:.3g}, {fl['kp']:.3g},\n"
+        f"    {bl['ks']:.3g}, {bl['kv']:.3g}, {bl['kp']:.3g},\n"
+        f"    {fr['ks']:.3g}, {fr['kv']:.3g}, {fr['kp']:.3g},\n"
+        f"    {br['ks']:.3g}, {br['kv']:.3g}, {br['kp']:.3g});\n")
+
+
 def main():
     # Parse the CLI arguments
     args = parse_args()
@@ -995,10 +1021,13 @@ def main():
     for subset in subsets:
         analyzer.subset = subset
         analyzer.run_analysis()
-        print(analyzer.report_parameters())
+        if subset in ["Forward Left", "Backward Left", "Forward Right", "Backward Right"]:
+            print(analyzer.report_parameters())
 
     # Print results for track width
-    print(f"Track width: {analyzer.track_width:.3g} {analyzer.units.lower()}")
+    print(f"Track width: {analyzer.track_width:.3g} {analyzer.units.lower()}\n")
+
+    print(gen_java_code(analyzer.saved_results))
 
 
 if __name__ == "__main__":
