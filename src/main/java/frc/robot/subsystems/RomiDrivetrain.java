@@ -56,28 +56,98 @@ public class RomiDrivetrain extends SubsystemBase {
     RAW, FF, PID, PIDF
   }
 
+enum Characteristics {
+  dataJan17(
+    1.18, 0.170, 0.000340,
+    1.81, 0.134, 0.000224,
+
+    1.41, 0.149, 0.000469,
+    1.30, 0.160, 0.0000757),
+  dataJan29OnBox(
+    1.44, 0.192, 0.00248,
+    1.43, 0.182, 0.00383,
+    1.27, 0.213, 0.00404,
+    1.17, 0.201, 0.00320),
+
+    // dataJan17Groomed(
+    //   0.531, 0.241, 10,
+    //   0.758, 0.228, 10,
+    //   0.426, 0.261, 10,
+    //   0.534, 0.254, 10),
+    dataJan17Groomed(
+      0.531, 0.241, 10,
+      0.550, 0.227, 10,
+      0.534, 0.283, 10,
+      0.426, 0.254, 10),
+      
+  // From https://github.com/bb-frc-workshops/romi-examples
+  dataFromExample(
+    0.929, 6.33, 0.085,
+    0.929, 6.33, 0.085,
+    0.929, 6.33, 0.085,
+    0.929, 6.33, 0.085);
+
+    double kSLeftFwd;
+    double kVLeftFwd;
+    double kPLeftFwd;
+    double kSLeftBack;
+    double kVLeftBack;
+    double kPLeftBack;
+
+    double kSRightFwd;
+    double kVRightFwd;
+    double kPRightFwd;
+    double kSRightBack;
+    double kVRightBack;
+    double kPRightBack;
+
+    Characteristics(double kSLeftFwd, double kVLeftFwd, double kPLeftFwd,
+                    double kSLeftBack, double kVLeftBack, double kPLeftBack,
+                    double kSRightFwd, double kVRightFwd, double kPRightFwd,
+                    double kSRightBack, double kVRightBack, double kPRightBack) {
+      this.kSLeftFwd = kSLeftFwd;
+      this.kVLeftFwd = kVLeftFwd;
+      this.kPLeftFwd = kPLeftFwd;
+      this.kSLeftBack = kSLeftBack;
+      this.kVLeftBack = kVLeftBack;
+      this.kPLeftBack = kPLeftBack;
+  
+      this.kSRightFwd = kSRightFwd;
+      this.kVRightFwd = kVRightFwd;
+      this.kPRightFwd = kPRightFwd;
+      this.kSRightBack = kSRightBack;
+      this.kVRightBack = kVRightBack;
+      this.kPRightBack = kPRightBack;
+    }    
+  };
+
   /**
    * Creates a new RomiDrivetrain.
    */
   public RomiDrivetrain() {
+    Characteristics data = Characteristics.dataJan17Groomed;
+
     leftEncoder.setDistancePerPulse(ticksToInches(1));
     rightEncoder.setDistancePerPulse(ticksToInches(1));
 
     // Create the speed controllers used for the various test modes.
-    // leftFFController = new FeedforwardSpeedController(leftMotor,   1.20, 0.0400, 1.46, 0.0345);
-    // rightFFController = new FeedforwardSpeedController(rightMotor, 1.37 , 0.0397, 1.38, 0.0364);
-    leftFFController = new FeedforwardSpeedController(leftMotor,   1.18, 0.17, 1.81, 0.134);
-    rightFFController = new FeedforwardSpeedController(rightMotor, 1.41, 0.149, 1.3, 0.16);
+    // leftFFController = new FeedforwardSpeedController(leftMotor,   1.18, 0.17, 1.81, 0.134);
+    // rightFFController = new FeedforwardSpeedController(rightMotor, 1.41, 0.149, 1.3, 0.16);
+    leftFFController = new FeedforwardSpeedController(leftMotor,
+      data.kSLeftFwd, data.kVLeftFwd, data.kSLeftBack, data.kVLeftBack);
+    rightFFController = new FeedforwardSpeedController(rightMotor,
+        data.kSRightBack, data.kVRightBack, data.kSRightFwd, data.kVRightFwd);
+        // data.kSRightFwd, data.kVRightFwd, data.kSRightBack, data.kVRightBack);
 
-    leftPIDController = new PIDSpeedController(leftMotor, leftEncoder::getRate, 0.25, 0.0, 0.0);
-    rightPIDController = new PIDSpeedController(rightMotor, rightEncoder::getRate, 0.25, 0.0, 0.0);
+    leftPIDController = new PIDSpeedController(leftMotor, leftEncoder::getRate, data.kPLeftFwd, 0.0, 0.0);
+    rightPIDController = new PIDSpeedController(rightMotor, rightEncoder::getRate, data.kPRightFwd, 0.0, 0.0);
   
     leftPIDFController = new PIDFSpeedController(leftMotor, leftEncoder::getRate,
-      1.18, 0.17, 1.81, 0.134,
-      0.0003400, 0.0002240);
+      data.kSLeftFwd, data.kVLeftFwd, data.kSLeftBack, data.kVLeftBack,
+      data.kPLeftFwd, data.kPLeftBack);
     rightPIDFController = new PIDFSpeedController(rightMotor, rightEncoder::getRate,
-      1.41, 0.149, 1.3, 0.16,
-      0.0004690, 0.0000757);
+      data.kSRightFwd, data.kVRightFwd, data.kSRightBack, data.kVRightBack,
+      data.kPRightFwd, data.kPRightBack);
 
     // Set up the differential drive controllers for the various test modes.
     diffDriveRaw = new DifferentialDrive(leftMotor, rightMotor);
@@ -88,6 +158,10 @@ public class RomiDrivetrain extends SubsystemBase {
     diffDriveFF.setMaxOutput(MAX_SPEED);
     diffDrivePID.setMaxOutput(MAX_SPEED);
     diffDrivePIDF.setMaxOutput(MAX_SPEED);
+
+    diffDriveFF.setDeadband(0.1);
+    diffDrivePID.setDeadband(0.1);
+    diffDrivePIDF.setDeadband(0.1);
 
     // Default to "raw" mode.
     setDiffDriveMode(DiffDriveMode.RAW);
