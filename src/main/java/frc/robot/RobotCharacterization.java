@@ -27,14 +27,13 @@ import java.util.ArrayList;
 
 public class RobotCharacterization extends TimedRobot {
 
-  static private double ENCODER_EDGES_PER_REV = 4 * 1440 / 4.;
+  static private double ENCODER_EDGES_PER_REV = 1440;
   static private double GEARING = 1;
   
   private double encoderConstant = (1 / GEARING) * (1 / ENCODER_EDGES_PER_REV);
 
   Joystick stick;
   DifferentialDrive drive;
-
 
   Supplier<Double> leftEncoderPosition;
   Supplier<Double> leftEncoderRate;
