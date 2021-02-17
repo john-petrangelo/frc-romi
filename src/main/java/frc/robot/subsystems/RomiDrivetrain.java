@@ -7,6 +7,10 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.networktables.EntryListenerFlags;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.LinearFilter;
 import edu.wpi.first.wpilibj.Spark;
@@ -56,38 +60,9 @@ public class RomiDrivetrain extends SubsystemBase {
     RAW, FF, PID, PIDF
   }
 
-enum Characteristics {
-  dataJan17(
-    1.18, 0.170, 0.000340,
-    1.81, 0.134, 0.000224,
-
-    1.41, 0.149, 0.000469,
-    1.30, 0.160, 0.0000757),
-  dataJan29OnBox(
-    1.44, 0.192, 0.00248,
-    1.43, 0.182, 0.00383,
-    1.27, 0.213, 0.00404,
-    1.17, 0.201, 0.00320),
-
-    // dataJan17Groomed(
-    //   0.531, 0.241, 10,
-    //   0.758, 0.228, 10,
-    //   0.426, 0.261, 10,
-    //   0.534, 0.254, 10),
-    dataJan17Groomed(
-      0.531, 0.241, 10,
-      0.550, 0.227, 10,
-      0.534, 0.283, 10,
-      0.426, 0.254, 10),
-      
-  // From https://github.com/bb-frc-workshops/romi-examples
-  dataFromExample(
-    0.929, 6.33, 0.085,
-    0.929, 6.33, 0.085,
-    0.929, 6.33, 0.085,
-    0.929, 6.33, 0.085);
-
+  private static class Characteristics {
     double kSLeftFwd;
+    double kVRightFwd;
     double kVLeftFwd;
     double kPLeftFwd;
     double kSLeftBack;
@@ -95,7 +70,6 @@ enum Characteristics {
     double kPLeftBack;
 
     double kSRightFwd;
-    double kVRightFwd;
     double kPRightFwd;
     double kSRightBack;
     double kVRightBack;
@@ -118,36 +92,73 @@ enum Characteristics {
       this.kSRightBack = kSRightBack;
       this.kVRightBack = kVRightBack;
       this.kPRightBack = kPRightBack;
-    }    
+    }
+
+    void dump() {
+      System.out.printf("Fwd  Left  (kS, kV, kP) = (%5.3f, %5.3f, %5.3f)\n", kSLeftFwd, kVLeftFwd, kPLeftFwd);
+      System.out.printf("Fwd  Right (kS, kV, kP) = (%5.3f, %5.3f, %5.3f)\n", kSRightFwd, kVRightFwd, kPRightFwd);
+      System.out.printf("Back Left  (kS, kV, kP) = (%5.3f, %5.3f, %5.3f)\n", kSLeftBack, kVLeftBack, kPLeftBack);
+      System.out.printf("Back Right (kS, kV, kP) = (%5.3f, %5.3f, %5.3f)\n", kSRightBack, kVRightBack, kPRightBack);
+    }
   };
+  
+  private final static Characteristics dataJan17 = new Characteristics(
+      1.18, 0.170, 0.000340,
+      1.81, 0.134, 0.000224,
+      1.41, 0.149, 0.000469,
+      1.30, 0.160, 0.0000757);
+
+  private final static Characteristics dataJan29OnBox = new Characteristics(
+      1.44, 0.192, 0.00248,
+      1.43, 0.182, 0.00383,
+      1.27, 0.213, 0.00404,
+      1.17, 0.201, 0.00320);
+
+  // dataJan17Groomed(
+  //   0.531, 0.241, 10,
+  //   0.758, 0.228, 10,
+  //   0.426, 0.261, 10,
+  //   0.534, 0.254, 10),
+  private final static Characteristics dataJan17Groomed = new Characteristics(
+      0.531, 0.241, 1.0,
+      0.550, 0.227, 1.0,
+      0.534, 0.283, 1.0,
+      0.426, 0.254, 1.0);
+      
+  // From https://github.com/bb-frc-workshops/romi-examples
+  private final static Characteristics dataFromExample = new Characteristics(
+    0.929, 6.33, 0.085,
+    0.929, 6.33, 0.085,
+    0.929, 6.33, 0.085,
+    0.929, 6.33, 0.085);
+
+  private Characteristics data = dataJan17Groomed;
 
   /**
    * Creates a new RomiDrivetrain.
    */
   public RomiDrivetrain() {
-    Characteristics data = Characteristics.dataJan17Groomed;
-
     leftEncoder.setDistancePerPulse(ticksToInches(1));
     rightEncoder.setDistancePerPulse(ticksToInches(1));
 
     // Create the speed controllers used for the various test modes.
-    // leftFFController = new FeedforwardSpeedController(leftMotor,   1.18, 0.17, 1.81, 0.134);
-    // rightFFController = new FeedforwardSpeedController(rightMotor, 1.41, 0.149, 1.3, 0.16);
-    leftFFController = new FeedforwardSpeedController(leftMotor,
+    leftFFController = new FeedforwardSpeedController("L", leftMotor,
       data.kSLeftFwd, data.kVLeftFwd, data.kSLeftBack, data.kVLeftBack);
-    rightFFController = new FeedforwardSpeedController(rightMotor,
-        data.kSRightBack, data.kVRightBack, data.kSRightFwd, data.kVRightFwd);
-        // data.kSRightFwd, data.kVRightFwd, data.kSRightBack, data.kVRightBack);
+    rightFFController = new FeedforwardSpeedController("R", rightMotor,
+      data.kSRightBack, data.kVRightBack, data.kSRightFwd, data.kVRightFwd);
+      // data.kSRightFwd, data.kVRightFwd, data.kSRightBack, data.kVRightBack);
 
     leftPIDController = new PIDSpeedController(leftMotor, leftEncoder::getRate, data.kPLeftFwd, 0.0, 0.0);
     rightPIDController = new PIDSpeedController(rightMotor, rightEncoder::getRate, data.kPRightFwd, 0.0, 0.0);
   
-    leftPIDFController = new PIDFSpeedController(leftMotor, leftEncoder::getRate,
-      data.kSLeftFwd, data.kVLeftFwd, data.kSLeftBack, data.kVLeftBack,
-      data.kPLeftFwd, data.kPLeftBack);
-    rightPIDFController = new PIDFSpeedController(rightMotor, rightEncoder::getRate,
-      data.kSRightFwd, data.kVRightFwd, data.kSRightBack, data.kVRightBack,
-      data.kPRightFwd, data.kPRightBack);
+    leftPIDFController = new PIDFSpeedController("L", leftMotor, leftEncoder::getRate,
+      data.kSLeftFwd,  data.kVLeftFwd,  data.kPLeftFwd,
+      data.kSLeftBack, data.kVLeftBack, data.kPLeftBack);
+    rightPIDFController = new PIDFSpeedController("R", rightMotor, rightEncoder::getRate,
+      data.kSRightBack, data.kVRightBack, data.kPRightBack,
+      data.kSRightFwd,  data.kVRightFwd,  data.kPRightFwd);
+      // data.kSRightFwd,  data.kVRightFwd,  data.kPRightFwd,
+      // data.kSRightBack, data.kVRightBack, data.kPRightBack);
 
     // Set up the differential drive controllers for the various test modes.
     diffDriveRaw = new DifferentialDrive(leftMotor, rightMotor);
@@ -165,30 +176,112 @@ enum Characteristics {
 
     // Default to "raw" mode.
     setDiffDriveMode(DiffDriveMode.RAW);
+
+    setupNetworkTablesListeners();
   }
 
   public void setDiffDriveMode(DiffDriveMode mode) {
     System.out.println("setDiffDriveMode " + mode.toString());
+    // System.out.println("Characterization Data:");
+    // data.dump();
+
     switch (mode) {
       case RAW:
         activeDiffDrive = diffDriveRaw;
-        SmartDashboard.putString("controller-mode", "raw");
+        SmartDashboard.putString("romi-o/controller-mode", "raw");
         break;
       case FF:
         activeDiffDrive = diffDriveFF;
-        SmartDashboard.putString("controller-mode", "FF");
+        leftFFController.setParameters (data.kSLeftFwd,   data.kVLeftFwd,   data.kSLeftBack, data.kVLeftBack);
+        rightFFController.setParameters(data.kSRightBack, data.kVRightBack, data.kSRightFwd, data.kVRightFwd);
+          // data.kSRightFwd, data.kVRightFwd, data.kSRightBack, data.kVRightBack);
+        SmartDashboard.putString("romi-o/controller-mode", "FF");
         break;
       case PID:
         activeDiffDrive = diffDrivePID;
-        SmartDashboard.putString("controller-mode", "PID");
+        SmartDashboard.putString("romi-o/controller-mode", "PID");
         break;
       case PIDF:
         activeDiffDrive = diffDrivePIDF;
-        SmartDashboard.putString("controller-mode", "FF + PID");
+        leftPIDFController.setParameters( data.kSLeftFwd,   data.kVLeftFwd,   data.kPLeftFwd,
+                                          data.kSLeftBack,  data.kVLeftBack,  data.kPLeftBack);
+        rightPIDFController.setParameters(data.kSRightBack, data.kVRightBack,data.kPRightBack,
+                                          data.kSRightFwd,  data.kVRightFwd, data.kPRightFwd);
+        // rightPIDFController.setParameters(data.kSRightFwd,  data.kVRightFwd,  data.kPRightFwd,
+        //                                   data.kSRightBack, data.kVRightBack, data.kPRightBack);
+        SmartDashboard.putString("romi-o/controller-mode", "FF + PID");
         break;
     }
     
     resetEncoders();
+  }
+
+  private void setupNetworkTablesListeners() {
+    NetworkTableInstance nti = NetworkTableInstance.getDefault();
+    NetworkTable ntTable = nti.getTable("SmartDashboard/romi-o");
+
+    ntTable.addEntryListener((table, key, entry, value, flags) -> {
+      System.out.println("Characterization data changed, " + key + ": " + value.getValue());
+      if (key.startsWith("drive-")) {
+        switch (key) {
+          case "drive-left-fwd-kS":
+            data.kSLeftFwd = value.getDouble();
+            break;
+          case "drive-left-fwd-kV":
+            data.kVLeftFwd = value.getDouble();
+            break;
+          case "drive-left-fwd-kP":
+            data.kPLeftFwd = value.getDouble();
+            break;
+          case "drive-left-back-kS":
+            data.kSLeftBack = value.getDouble();
+            break;
+          case "drive-left-back-kV":
+            data.kVLeftBack = value.getDouble();
+            break;
+          case "drive-left-back-kP":
+            data.kPLeftBack = value.getDouble();
+            break;
+          case "drive-right-fwd-kS":
+            data.kSRightFwd = value.getDouble();
+            break;
+          case "drive-right-fwd-kV":
+            data.kVRightFwd = value.getDouble();
+            break;
+          case "drive-right-fwd-kP":
+            data.kPRightFwd = value.getDouble();
+            break;
+          case "drive-right-back-kS":
+            data.kSRightBack = value.getDouble();
+            break;
+          case "drive-right-back-kV":
+            data.kVRightBack = value.getDouble();
+            break;
+          case "drive-right-back-kP":
+            data.kPRightBack = value.getDouble();
+            break;
+        }
+      }
+    }, EntryListenerFlags.kUpdate);
+  }
+
+  public void publishParams() {
+    String prefix = "romi-o/";
+    SmartDashboard.putNumber(prefix + "drive-left-fwd-kS", data.kSLeftFwd);
+    SmartDashboard.putNumber(prefix + "drive-left-fwd-kV", data.kVLeftFwd);
+    SmartDashboard.putNumber(prefix + "drive-left-fwd-kP", data.kPLeftFwd);
+
+    SmartDashboard.putNumber(prefix + "drive-left-back-kS", data.kSLeftBack);
+    SmartDashboard.putNumber(prefix + "drive-left-back-kV", data.kVLeftBack);
+    SmartDashboard.putNumber(prefix + "drive-left-back-kP", data.kPLeftBack);
+
+    SmartDashboard.putNumber(prefix + "drive-right-fwd-kS", data.kSRightFwd);
+    SmartDashboard.putNumber(prefix + "drive-right-fwd-kV", data.kVRightFwd);
+    SmartDashboard.putNumber(prefix + "drive-right-fwd-kP", data.kPRightFwd);
+
+    SmartDashboard.putNumber(prefix + "drive-right-back-kS", data.kSRightBack);
+    SmartDashboard.putNumber(prefix + "drive-right-back-kV", data.kVRightBack);
+    SmartDashboard.putNumber(prefix + "drive-right-back-kP", data.kPRightBack);
   }
 
   public void arcadeDrive(double speed, double rotation) {

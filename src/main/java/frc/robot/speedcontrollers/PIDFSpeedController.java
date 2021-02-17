@@ -9,22 +9,29 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class PIDFSpeedController implements SpeedController {
     private final SpeedController other;
-    private final SimpleMotorFeedforward fwdFF;
-    private final SimpleMotorFeedforward backFF;
-    private final PIDController fwdPID;
-    private final PIDController backPID;
+    private SimpleMotorFeedforward fwdFF;
+    private SimpleMotorFeedforward backFF;
+    private PIDController fwdPID;
+    private PIDController backPID;
     private final Supplier<Double> measurement;
+    private final String name;
 
-    public PIDFSpeedController(SpeedController other, Supplier<Double> measurement,
-            double kSFwd, double kVFwd, double kSBack, double kVBack,
-            double kPFwd, double kPBack) {
+    public PIDFSpeedController(String name, SpeedController other, Supplier<Double> measurement,
+            double kSFwd, double kVFwd, double kPFwd,
+            double kSBack, double kVBack, double kPBack) {
+        this.name = name;
         this.other = other;
         this.measurement = measurement;
+        setParameters(kSFwd, kVFwd, kPFwd, kSBack, kVBack, kPBack);
+	}
+
+    public void setParameters(double kSFwd, double kVFwd, double kPFwd,
+                              double kSBack, double kVBack, double kPBack) {
         fwdPID = new PIDController(kPFwd, 0.0, 0.0);
         backPID = new PIDController(kPBack, 0.0, 0.0);
         fwdFF  = new SimpleMotorFeedforward(kSFwd,  kVFwd);
         backFF = new SimpleMotorFeedforward(kSBack, kVBack);
-	}
+    }
 
 	@Override
     public void pidWrite(double output) {
@@ -37,10 +44,20 @@ public class PIDFSpeedController implements SpeedController {
             double ffV = fwdFF.calculate(speed);
             double pidV = fwdPID.calculate(measurement.get(), speed);
             other.setVoltage(ffV + pidV);
-            SmartDashboard.putNumber("FF volts", ffV);
-            SmartDashboard.putNumber("PID volts", pidV);
+            System.out.printf("PIDF[F%s] speed=%5.3f ffV=%5.3f pidV=%5.3f\n", name, speed, ffV, pidV);
+            SmartDashboard.putNumber(name + "-FF volts", ffV);
+            SmartDashboard.putNumber(name + "-PID volts", pidV);
+        } else if (speed < 0.0) {
+            double ffV = backFF.calculate(speed);
+            double pidV = backPID.calculate(measurement.get(), speed);
+            other.setVoltage(ffV + pidV);
+            System.out.printf("PIDF[B%s] speed=%5.3f ffV=%5.3f pidV=%5.3f\n", name, speed, ffV, pidV);
+            SmartDashboard.putNumber(name + "-FF volts", ffV);
+            SmartDashboard.putNumber(name + "-PID volts", pidV);
         } else {
-            other.setVoltage(backFF.calculate(speed) + backPID.calculate(measurement.get(), speed));
+            double ffV = backFF.calculate(speed);
+            double pidV = backPID.calculate(measurement.get(), speed);
+            other.setVoltage(ffV + pidV);
         }
     }
 

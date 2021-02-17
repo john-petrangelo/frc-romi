@@ -2,14 +2,22 @@ package frc.robot.speedcontrollers;
 
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class FeedforwardSpeedController implements SpeedController {
     private final SpeedController other;
-    private final SimpleMotorFeedforward fwdFF;
-    private final SimpleMotorFeedforward backFF;
+    private SimpleMotorFeedforward fwdFF;
+    private SimpleMotorFeedforward backFF;
+    private final String name;
 
-    public FeedforwardSpeedController(SpeedController other, double kSFwd, double kVFwd, double kSBack, double kVBack) {
+    public FeedforwardSpeedController(String name, SpeedController other,
+            double kSFwd, double kVFwd, double kSBack, double kVBack) {
+        this.name = name;
         this.other = other;
+        setParameters(kSFwd, kVFwd, kSBack, kVBack);
+    }
+
+    public void setParameters(double kSFwd, double kVFwd, double kSBack, double kVBack) {
         fwdFF  = new SimpleMotorFeedforward(kSFwd,  kVFwd);
         backFF = new SimpleMotorFeedforward(kSBack, kVBack);
     }
@@ -22,9 +30,17 @@ public class FeedforwardSpeedController implements SpeedController {
     @Override
     public void set(double speed) {
         if (speed > 0.0) {
-            other.setVoltage(fwdFF.calculate(speed));
+            double ffV = fwdFF.calculate(speed);
+            other.setVoltage(ffV);
+            System.out.printf("FF[F%s] speed=%5.3f ffV=%5.3f\n", name, speed, ffV);
+            SmartDashboard.putNumber(name + "-FF volts", ffV);
+            SmartDashboard.putNumber(name + "-PID volts", 0);
         } else {
-            other.setVoltage(backFF.calculate(speed));
+            double ffV = backFF.calculate(speed);
+            other.setVoltage(ffV);
+            System.out.printf("FF[B%s] speed=%5.3f ffV=%5.3f\n", name, speed, ffV);
+            SmartDashboard.putNumber(name + "-FF volts", ffV);
+            SmartDashboard.putNumber(name + "-PID volts", 0);
         }
     }
 
