@@ -1,46 +1,41 @@
-/*----------------------------------------------------------------------------*/
-/* Copyright (c) 2018-2020 FIRST. All Rights Reserved.                        */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-
 package frc.robot;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.ArcadeDrive;
 import frc.robot.commands.DriveBackward;
 import frc.robot.commands.DriveForward;
-import frc.robot.commands.ArcadeDrive;
+import frc.robot.GrayBlueController.Axes;
+import frc.robot.GrayBlueController.Buttons;
 import frc.robot.subsystems.RomiDrivetrain;
 
 /**
- * This class is where the bulk of the robot should be declared.  Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls).  Instead, the structure of the robot
- * (including subsystems, commands, and button mappings) should be declared here.
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a "declarative" paradigm, very little robot logic should
+ * actually be handled in the {@link Robot} periodic methods (other than the
+ * scheduler calls). Instead, the structure of the robot (including subsystems,
+ * commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
   private final RomiDrivetrain drivetrain = new RomiDrivetrain();
 
   private final Joystick controller = new Joystick(0);
-  private final JoystickButton buttonA = new JoystickButton(controller, XboxController.Button.kA.value);
-  private final JoystickButton buttonB = new JoystickButton(controller, XboxController.Button.kB.value);
-  private final JoystickButton buttonX = new JoystickButton(controller, XboxController.Button.kX.value);
-  private final JoystickButton buttonY = new JoystickButton(controller, XboxController.Button.kY.value);
-  private final JoystickButton buttonStart = new JoystickButton(controller, XboxController.Button.kStart.value);
-  private final JoystickButton povUp = new JoystickButton(controller, 12);
-  private final JoystickButton povDown = new JoystickButton(controller, 13);
-  private final JoystickButton rightBumper = new JoystickButton(controller, XboxController.Button.kBumperRight.value);
+  private final JoystickButton buttonA = new JoystickButton(controller, Buttons.A.value);
+  private final JoystickButton buttonB = new JoystickButton(controller, Buttons.B.value);
+  private final JoystickButton buttonX = new JoystickButton(controller, Buttons.X.value);
+  private final JoystickButton buttonY = new JoystickButton(controller, Buttons.Y.value);
+  private final JoystickButton buttonStart = new JoystickButton(controller, Buttons.Start.value);
+  private final JoystickButton povUp = new JoystickButton(controller, Buttons.POVup.value);
+  private final JoystickButton povDown = new JoystickButton(controller, Buttons.POVdown.value);
+  private final JoystickButton rightBumper = new JoystickButton(controller, Buttons.BumperRight.value);
 
   public RobotContainer() {
     // The default command is run when no other commands are active.
     drivetrain.setDefaultCommand(new ArcadeDrive(drivetrain,
-        () -> -controller.getRawAxis(1),
-        () ->  controller.getRawAxis(4)
+        () -> -controller.getRawAxis(Axes.LeftY.value),
+        () ->  controller.getRawAxis(Axes.RightX.value)
     ));
 
     configureButtonBindings();
