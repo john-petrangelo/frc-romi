@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.speedcontrollers.FeedforwardSpeedController;
-import frc.robot.speedcontrollers.NTVoltsSpeedController;
+import frc.robot.speedcontrollers.FixedVoltsSpeedController;
 import frc.robot.speedcontrollers.PIDFSpeedController;
 import frc.robot.speedcontrollers.PIDSpeedController;
 
@@ -49,8 +49,8 @@ public class RomiDrivetrain extends SubsystemBase {
   private final PIDFSpeedController leftPIDFController;
   private final PIDFSpeedController rightPIDFController;
 
-  private final NTVoltsSpeedController leftNTVoltsController;
-  private final NTVoltsSpeedController rightNTVoltsController;
+  private final FixedVoltsSpeedController leftNTVoltsController;
+  private final FixedVoltsSpeedController rightNTVoltsController;
 
   // Set up the differential drive controllers.
   private final DifferentialDrive diffDriveRaw;
@@ -162,8 +162,8 @@ public class RomiDrivetrain extends SubsystemBase {
       data.kSRightBack, data.kVRightBack, data.kPRightBack,
       data.kSRightFwd,  data.kVRightFwd,  data.kPRightFwd);
 
-    leftNTVoltsController = new NTVoltsSpeedController("L", leftMotor, leftEncoder::getRate, 1.0);
-    rightNTVoltsController = new NTVoltsSpeedController("R", rightMotor, rightEncoder::getRate, 1.0);
+    leftNTVoltsController = new FixedVoltsSpeedController("L", leftMotor, leftEncoder::getRate, 1.0);
+    rightNTVoltsController = new FixedVoltsSpeedController("R", rightMotor, rightEncoder::getRate, 1.0);
 
     // Set up the differential drive controllers for the various test modes.
     diffDriveRaw = new DifferentialDrive(leftMotor, rightMotor);

@@ -5,13 +5,13 @@ import java.util.function.Supplier;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class NTVoltsSpeedController implements SpeedController {
+public class FixedVoltsSpeedController implements SpeedController {
     private final SpeedController other;
     private final Supplier<Double> measurement;
     private final String name;
     double volts;
 
-    public NTVoltsSpeedController(String name, SpeedController other, Supplier<Double> measurement,
+    public FixedVoltsSpeedController(String name, SpeedController other, Supplier<Double> measurement,
             double volts) {
         this.name = name;
         this.other = other;
