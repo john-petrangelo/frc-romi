@@ -9,7 +9,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.LinearFilter;
@@ -62,7 +61,7 @@ public class RomiDrivetrain extends SubsystemBase {
   private DifferentialDrive activeDiffDrive;
 
   public enum DiffDriveMode {
-    RAW, FF, PID, PIDF, NT_VOLTS
+    RAW, FF, PIDF_PZ, PIDF, NT_VOLTS
   }
 
   private static class Characteristics {
@@ -206,7 +205,7 @@ public class RomiDrivetrain extends SubsystemBase {
           // data.kSRightFwd, data.kVRightFwd, data.kSRightBack, data.kVRightBack);
         SmartDashboard.putString("romi-o/controller-mode", "FF");
         break;
-      case PID:
+      case PIDF_PZ:
         activeDiffDrive = diffDrivePIDF;
         leftPIDFController.setParameters( data.kSLeftFwd,   data.kVLeftFwd,   0.0,
                                           data.kSLeftBack,  data.kVLeftBack,  0.0);
