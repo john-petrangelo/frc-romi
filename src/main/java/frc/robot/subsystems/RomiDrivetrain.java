@@ -189,22 +189,19 @@ public class RomiDrivetrain extends SubsystemBase {
   }
 
   public void setDiffDriveMode(DiffDriveMode mode) {
-    final String controllerMode = "Romi-O/ControllerMode";
+    final String driveModeKey = "Romi-O/DriveMode";
 
-    System.out.println("setDiffDriveMode " + mode.toString());
-    // System.out.println("Characterization Data:");
-    // data.dump();
-
+    System.out.println("New drive mode: " + mode.toString());
     switch (mode) {
       case RAW:
         activeDiffDrive = diffDriveRaw;
-        SmartDashboard.putString(controllerMode, "Raw");
+        SmartDashboard.putString(driveModeKey, "Raw");
         break;
       case FF:
         activeDiffDrive = diffDriveFF;
         leftFFController.setParameters (data.kSLeftFwd,   data.kVLeftFwd,   data.kSLeftBack, data.kVLeftBack);
         rightFFController.setParameters(data.kSRightBack, data.kVRightBack, data.kSRightFwd, data.kVRightFwd);
-        SmartDashboard.putString(controllerMode, "FF");
+        SmartDashboard.putString(driveModeKey, "FF");
         break;
       case PIDF_PZ:
         activeDiffDrive = diffDrivePIDF;
@@ -212,7 +209,7 @@ public class RomiDrivetrain extends SubsystemBase {
                                           data.kSLeftBack,  data.kVLeftBack,  0.0);
         rightPIDFController.setParameters(data.kSRightBack, data.kVRightBack,0.0,
                                           data.kSRightFwd,  data.kVRightFwd, 0.0);
-        SmartDashboard.putString(controllerMode, "FF + PID(kP=0)");
+        SmartDashboard.putString(driveModeKey, "FF + PID(kP=0)");
         break;
         case PIDF:
         activeDiffDrive = diffDrivePIDF;
@@ -220,14 +217,14 @@ public class RomiDrivetrain extends SubsystemBase {
                                           data.kSLeftBack,  data.kVLeftBack,  data.kPLeftBack);
         rightPIDFController.setParameters(data.kSRightBack, data.kVRightBack,data.kPRightBack,
                                           data.kSRightFwd,  data.kVRightFwd, data.kPRightFwd);
-        SmartDashboard.putString(controllerMode, "FF + PID");
+        SmartDashboard.putString(driveModeKey, "FF + PID");
         break;
       case NT_VOLTS:
         activeDiffDrive = diffDriveNTVolts;
         double volts = SmartDashboard.getNumber("SetVolts", 0.0);
         leftNTVoltsController.setParameters(volts);
         rightNTVoltsController.setParameters(volts);
-        SmartDashboard.putString(controllerMode, "NT Volts");
+        SmartDashboard.putString(driveModeKey, "NT Volts");
         break;
     }
     
@@ -322,10 +319,16 @@ public class RomiDrivetrain extends SubsystemBase {
     return ticksToInches(rightEncoder.get());
   }
 
+  /**
+   * Returns the left motor rate in inches.
+   */
   public double getLeftRate() {
     return leftEncoder.getRate();
   }
 
+  /**
+   * Returns the right motor rate in inches.
+   */
   public double getRightRate() {
     return rightEncoder.getRate();
   }
@@ -335,8 +338,8 @@ public class RomiDrivetrain extends SubsystemBase {
     SmartDashboard.putNumber("LeftSpeed", leftDriveSpeed.calculate(getLeftRate()));
     SmartDashboard.putNumber("RightSpeed", rightDriveSpeed.calculate(getRightRate()));
  
-    SmartDashboard.putNumber("LeftDistance", leftDriveSpeed.calculate(getLeftDistanceInch()));
-    SmartDashboard.putNumber("RightDistance-distnace", rightDriveSpeed.calculate(getRightDistanceInch()));
+    SmartDashboard.putNumber("LeftDistance", getLeftDistanceInch());
+    SmartDashboard.putNumber("RightDistance", getRightDistanceInch());
 
     // Only the "active" differential drive feeds its speed controllers.
     // Explicitly feed all of them so nobody starves.
