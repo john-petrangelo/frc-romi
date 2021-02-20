@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class FixedVoltsSpeedController implements SpeedController {
     private final SpeedController other;
-    private final Supplier<Double> measurement;
     private final String name;
     double volts;
 
@@ -15,9 +14,8 @@ public class FixedVoltsSpeedController implements SpeedController {
             double volts) {
         this.name = name;
         this.other = other;
-        this.measurement = measurement;
         setParameters(volts);
-        SmartDashboard.putNumber("romi-o/set-volts", volts);
+        SmartDashboard.putNumber("SetVolts", volts);
 	}
 
     public void setParameters(double volts) {
@@ -33,9 +31,7 @@ public class FixedVoltsSpeedController implements SpeedController {
     @Override
     public void set(double speed) {
         other.setVoltage(Math.signum(speed) * volts);
-        SmartDashboard.putNumber(name + "-requested-speed", speed);
-        SmartDashboard.putNumber(name + "-actual-speed", Math.signum(speed) * measurement.get());
-        SmartDashboard.putNumber(name + "-volts", Math.signum(speed) * volts);
+        SmartDashboard.putNumber(name + "-RequestedSpeed", speed);
     }
 
     @Override
