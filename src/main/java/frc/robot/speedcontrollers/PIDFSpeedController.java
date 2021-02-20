@@ -40,25 +40,28 @@ public class PIDFSpeedController implements SpeedController {
 
     @Override
     public void set(double speed) {
+        double ffV;
+        double pidV;
         if (speed > 0.0) {
-            double ffV = fwdFF.calculate(speed);
-            double pidV = fwdPID.calculate(measurement.get(), speed);
-            other.setVoltage(ffV + pidV);
-            System.out.printf("PIDF[F%s] speed=%5.3f ffV=%5.3f pidV=%5.3f\n", name, speed, ffV, pidV);
-            SmartDashboard.putNumber(name + "-FF volts", ffV);
-            SmartDashboard.putNumber(name + "-PID volts", pidV);
+            ffV = fwdFF.calculate(speed);
+            pidV = fwdPID.calculate(measurement.get(), speed);
+            System.out.printf("PIDF[F%s] speed=%4.2f ffV=%5.3f pidV=%5.3f actual=%4.2f\n",
+                name, speed, ffV, pidV, measurement.get());
         } else if (speed < 0.0) {
-            double ffV = backFF.calculate(speed);
-            double pidV = backPID.calculate(measurement.get(), speed);
-            other.setVoltage(ffV + pidV);
-            System.out.printf("PIDF[B%s] speed=%5.3f ffV=%5.3f pidV=%5.3f\n", name, speed, ffV, pidV);
-            SmartDashboard.putNumber(name + "-FF volts", ffV);
-            SmartDashboard.putNumber(name + "-PID volts", pidV);
+            ffV = backFF.calculate(speed);
+            pidV = backPID.calculate(measurement.get(), speed);
+            System.out.printf("PIDF[F%s] speed=%4.2f ffV=%5.3f pidV=%5.3f actual=%4.2f\n",
+                name, speed, ffV, pidV, measurement.get());
         } else {
-            double ffV = backFF.calculate(speed);
-            double pidV = backPID.calculate(measurement.get(), speed);
-            other.setVoltage(ffV + pidV);
+            ffV = backFF.calculate(speed);
+            pidV = backPID.calculate(measurement.get(), speed);
         }
+
+        other.setVoltage(ffV + pidV);
+        SmartDashboard.putNumber(name + "-FF volts", ffV);
+        SmartDashboard.putNumber(name + "-PID volts", pidV);
+        SmartDashboard.putNumber(name + "-requested-speed", speed);
+        SmartDashboard.putNumber(name + "-actual-speed", Math.signum(speed) * measurement.get());
     }
 
     @Override
