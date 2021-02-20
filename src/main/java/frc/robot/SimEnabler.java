@@ -9,13 +9,13 @@ public class SimEnabler implements Sendable {
   DriverStationSim sim = new DriverStationSim();
 
   public SimEnabler() {
-    System.out.println("SimEnabler constructed");
-    sim.setAutonomous(true);
+    DriverStationSim.setAutonomous(true);
   }
 
   public void setEnabled(boolean enabled) {
-    sim.setEnabled(enabled);
-    sim.notifyNewData();
+    System.out.println("Simulation enabled");
+    DriverStationSim.setEnabled(enabled);
+    DriverStationSim.notifyNewData();
     DriverStation.getInstance().isNewControlData();
     while (DriverStation.getInstance().isEnabled() != enabled) {
       try {
