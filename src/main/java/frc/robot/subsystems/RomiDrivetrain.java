@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.speedcontrollers.FeedforwardSpeedController;
+import frc.robot.speedcontrollers.NTVoltsSpeedController;
 import frc.robot.speedcontrollers.PIDFSpeedController;
 import frc.robot.speedcontrollers.PIDSpeedController;
 
@@ -49,15 +50,19 @@ public class RomiDrivetrain extends SubsystemBase {
   private final PIDFSpeedController leftPIDFController;
   private final PIDFSpeedController rightPIDFController;
 
+  private final NTVoltsSpeedController leftNTVoltsController;
+  private final NTVoltsSpeedController rightNTVoltsController;
+
   // Set up the differential drive controllers.
   private final DifferentialDrive diffDriveRaw;
   private final DifferentialDrive diffDriveFF;
   private final DifferentialDrive diffDrivePID;
   private final DifferentialDrive diffDrivePIDF;
+  private final DifferentialDrive diffDriveNTVolts;
   private DifferentialDrive activeDiffDrive;
 
   public enum DiffDriveMode {
-    RAW, FF, PID, PIDF
+    RAW, FF, PID, PIDF, NT_VOLTS
   }
 
   private static class Characteristics {
@@ -120,10 +125,10 @@ public class RomiDrivetrain extends SubsystemBase {
   //   0.426, 0.261, 10,
   //   0.534, 0.254, 10),
   private final static Characteristics dataJan17Groomed = new Characteristics(
-      0.531, 0.241, 1.0,
-      0.550, 0.227, 1.0,
-      0.534, 0.283, 1.0,
-      0.426, 0.254, 1.0);
+      0.531, 0.241, 0.25,
+      0.550, 0.227, 0.25,
+      0.534, 0.283, 0.25,
+      0.426, 0.254, 0.25);
       
   // From https://github.com/bb-frc-workshops/romi-examples
   private final static Characteristics dataFromExample = new Characteristics(
@@ -157,22 +162,26 @@ public class RomiDrivetrain extends SubsystemBase {
     rightPIDFController = new PIDFSpeedController("R", rightMotor, rightEncoder::getRate,
       data.kSRightBack, data.kVRightBack, data.kPRightBack,
       data.kSRightFwd,  data.kVRightFwd,  data.kPRightFwd);
-      // data.kSRightFwd,  data.kVRightFwd,  data.kPRightFwd,
-      // data.kSRightBack, data.kVRightBack, data.kPRightBack);
+
+    leftNTVoltsController = new NTVoltsSpeedController("L", leftMotor, leftEncoder::getRate, 1.0);
+    rightNTVoltsController = new NTVoltsSpeedController("R", rightMotor, rightEncoder::getRate, 1.0);
 
     // Set up the differential drive controllers for the various test modes.
     diffDriveRaw = new DifferentialDrive(leftMotor, rightMotor);
     diffDriveFF = new DifferentialDrive(leftFFController, rightFFController);
     diffDrivePID = new DifferentialDrive(leftPIDController, rightPIDController);
     diffDrivePIDF = new DifferentialDrive(leftPIDFController, rightPIDFController);
+    diffDriveNTVolts = new DifferentialDrive(leftNTVoltsController, rightNTVoltsController);
 
     diffDriveFF.setMaxOutput(MAX_SPEED);
     diffDrivePID.setMaxOutput(MAX_SPEED);
     diffDrivePIDF.setMaxOutput(MAX_SPEED);
+    diffDriveNTVolts.setMaxOutput(MAX_SPEED);
 
-    diffDriveFF.setDeadband(0.1);
-    diffDrivePID.setDeadband(0.1);
-    diffDrivePIDF.setDeadband(0.1);
+    diffDriveFF.setDeadband(0.12);
+    diffDrivePID.setDeadband(0.12);
+    diffDrivePIDF.setDeadband(0.12);
+    diffDriveNTVolts.setDeadband(0.12);
 
     // Default to "raw" mode.
     setDiffDriveMode(DiffDriveMode.RAW);
@@ -198,18 +207,27 @@ public class RomiDrivetrain extends SubsystemBase {
         SmartDashboard.putString("romi-o/controller-mode", "FF");
         break;
       case PID:
-        activeDiffDrive = diffDrivePID;
-        SmartDashboard.putString("romi-o/controller-mode", "PID");
+        activeDiffDrive = diffDrivePIDF;
+        leftPIDFController.setParameters( data.kSLeftFwd,   data.kVLeftFwd,   0.0,
+                                          data.kSLeftBack,  data.kVLeftBack,  0.0);
+        rightPIDFController.setParameters(data.kSRightBack, data.kVRightBack,0.0,
+                                          data.kSRightFwd,  data.kVRightFwd, 0.0);
+        SmartDashboard.putString("romi-o/controller-mode", "FF + PID(kP=0)");
         break;
-      case PIDF:
+        case PIDF:
         activeDiffDrive = diffDrivePIDF;
         leftPIDFController.setParameters( data.kSLeftFwd,   data.kVLeftFwd,   data.kPLeftFwd,
                                           data.kSLeftBack,  data.kVLeftBack,  data.kPLeftBack);
         rightPIDFController.setParameters(data.kSRightBack, data.kVRightBack,data.kPRightBack,
                                           data.kSRightFwd,  data.kVRightFwd, data.kPRightFwd);
-        // rightPIDFController.setParameters(data.kSRightFwd,  data.kVRightFwd,  data.kPRightFwd,
-        //                                   data.kSRightBack, data.kVRightBack, data.kPRightBack);
         SmartDashboard.putString("romi-o/controller-mode", "FF + PID");
+        break;
+      case NT_VOLTS:
+        activeDiffDrive = diffDriveNTVolts;
+        double volts = SmartDashboard.getNumber("romi-o/set-volts", 0.0);
+        leftNTVoltsController.setParameters(volts);
+        rightNTVoltsController.setParameters(volts);
+        SmartDashboard.putString("romi-o/controller-mode", "NT Volts");
         break;
     }
     

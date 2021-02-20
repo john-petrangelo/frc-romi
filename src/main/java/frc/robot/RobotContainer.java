@@ -39,6 +39,7 @@ public class RobotContainer {
   private final JoystickButton buttonStart = new JoystickButton(controller, XboxController.Button.kStart.value);
   private final JoystickButton povUp = new JoystickButton(controller, 12);
   private final JoystickButton povDown = new JoystickButton(controller, 13);
+  private final JoystickButton rightBumper = new JoystickButton(controller, XboxController.Button.kBumperRight.value);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -62,11 +63,11 @@ public class RobotContainer {
     povUp.whenPressed(new DriveForward(drivetrain, 12.0));
     povDown.whenPressed(new DriveBackward(drivetrain, 12.0));
 
-    buttonA.whenPressed(() -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.PIDF));
-    buttonB.whenPressed(() -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.PID));
-    buttonX.whenPressed(() -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.FF));
-    buttonY.whenPressed(() -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.RAW));
-
+    buttonA.whenPressed(()     -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.PIDF));
+    buttonB.whenPressed(()     -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.PID));
+    buttonX.whenPressed(()     -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.FF));
+    buttonY.whenPressed(()     -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.RAW));
+    rightBumper.whenPressed(() -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.NT_VOLTS));
     buttonStart.whenPressed(() -> drivetrain.publishParams());
   }
 
