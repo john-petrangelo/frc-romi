@@ -25,12 +25,8 @@ import frc.robot.subsystems.RomiDrivetrain;
  * (including subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
   private final RomiDrivetrain drivetrain = new RomiDrivetrain();
 
-  // private final OnBoardIO onboardIO = new OnBoardIO(ChannelMode.INPUT, ChannelMode.INPUT);
-
-  // Assumes a gamepad plugged into channel 0.
   private final Joystick controller = new Joystick(0);
   private final JoystickButton buttonA = new JoystickButton(controller, XboxController.Button.kA.value);
   private final JoystickButton buttonB = new JoystickButton(controller, XboxController.Button.kB.value);
@@ -41,10 +37,8 @@ public class RobotContainer {
   private final JoystickButton povDown = new JoystickButton(controller, 13);
   private final JoystickButton rightBumper = new JoystickButton(controller, XboxController.Button.kBumperRight.value);
 
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
   public RobotContainer() {
+    // The default command is run when no other commands are active.
     drivetrain.setDefaultCommand(new ArcadeDrive(drivetrain,
         () -> -controller.getRawAxis(1),
         () ->  controller.getRawAxis(4)
