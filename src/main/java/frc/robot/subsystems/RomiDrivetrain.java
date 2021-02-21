@@ -22,7 +22,7 @@ import frc.robot.speedcontrollers.PIDFSpeedController;
 import frc.robot.speedcontrollers.PIDSpeedController;
 
 public class RomiDrivetrain extends SubsystemBase {
-  private static final double COUNTS_PER_REVOLUTION = 1440.0 / 2;  // TODO What is the right value? Off by x2?
+  private static final double COUNTS_PER_REVOLUTION = 1440.0;
   private static final double WHEEL_DIAMETER_INCHES = 2.75;
   private static final double MAX_SPEED = 20.0;
 
