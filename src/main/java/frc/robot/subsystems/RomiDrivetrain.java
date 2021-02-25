@@ -12,6 +12,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SlewRateLimiter;
+
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -106,41 +107,11 @@ public class RomiDrivetrain extends SubsystemBase {
     }
   };
   
-  private final static Characteristics dataJan17 = new Characteristics(
-      1.18, 0.170, 0.000340,
-      1.81, 0.134, 0.000224,
-      1.41, 0.149, 0.000469,
-      1.30, 0.160, 0.0000757);
-
-  private final static Characteristics dataJan29OnBox = new Characteristics(
-      1.44, 0.192, 0.00248,
-      1.43, 0.182, 0.00383,
-      1.27, 0.213, 0.00404,
-      1.17, 0.201, 0.00320);
-
-  // dataJan17Groomed(
-  //   0.531, 0.241, 10,
-  //   0.758, 0.228, 10,
-  //   0.426, 0.261, 10,
-  //   0.534, 0.254, 10),
-  private final static Characteristics dataJan17Groomed = new Characteristics(
-      0.531, 0.241, 0.25,
-      0.550, 0.227, 0.25,
-      0.534, 0.283, 0.25,
-      0.426, 0.254, 0.25);
-      
-  // From https://github.com/bb-frc-workshops/romi-examples
-  private final static Characteristics dataFromExample = new Characteristics(
-    0.929, 6.33, 0.085,
-    0.929, 6.33, 0.085,
-    0.929, 6.33, 0.085,
-    0.929, 6.33, 0.085);
-
     private final static Characteristics myData = new Characteristics(
-        0.5, 0.233, 0.0,
-        0.5, 0.260, 0.0,
-        0.5, 0.3, 0.0,
-        0.5, 0.3, 0.0);
+        0.4687, 0.2365, 0.0,
+        0.2993, 0.2701, 0.0,
+        0.5561, 0.2684, 0.0,
+        0.7771, 0.2531, 0.0);
       
   // private Characteristics data = dataJan17Groomed;
   private Characteristics data = myData;
