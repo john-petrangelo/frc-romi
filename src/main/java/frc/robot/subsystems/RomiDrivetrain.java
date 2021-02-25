@@ -136,7 +136,14 @@ public class RomiDrivetrain extends SubsystemBase {
     0.929, 6.33, 0.085,
     0.929, 6.33, 0.085);
 
-  private Characteristics data = dataJan17Groomed;
+    private final static Characteristics myData = new Characteristics(
+        0.5, 0.233, 0.0,
+        0.5, 0.260, 0.0,
+        0.5, 0.3, 0.0,
+        0.5, 0.3, 0.0);
+      
+  // private Characteristics data = dataJan17Groomed;
+  private Characteristics data = myData;
 
   /**
    * Creates a new RomiDrivetrain.
