@@ -32,18 +32,16 @@ public class FeedforwardSpeedController implements SpeedController {
         if (speed > 0.0) {
             double ffV = fwdFF.calculate(speed);
             other.setVoltage(ffV);
-            System.out.printf("FF[F%s] speed=%5.3f ffV=%5.3f\n", name, speed, ffV);
-            SmartDashboard.putNumber(name + "-FF volts", ffV);
-            SmartDashboard.putNumber(name + "-PID volts", 0);
+            SmartDashboard.putNumber(name + "-FF Volts", ffV);
         } else if (speed < 0.0) {
             double ffV = backFF.calculate(speed);
             other.setVoltage(ffV);
-            System.out.printf("FF[B%s] speed=%5.3f ffV=%5.3f\n", name, speed, ffV);
-            SmartDashboard.putNumber(name + "-FF volts", ffV);
-            SmartDashboard.putNumber(name + "-PID volts", 0);
+            SmartDashboard.putNumber(name + "-FF Volts", ffV);
         } else {
             other.setVoltage(0.0);
         }
+
+        SmartDashboard.putNumber(name + "-RequestedSpeed", speed);
     }
 
     @Override
