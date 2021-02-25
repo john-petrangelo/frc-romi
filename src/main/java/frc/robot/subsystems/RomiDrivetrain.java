@@ -11,7 +11,7 @@ import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.LinearFilter;
+import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -36,9 +36,9 @@ public class RomiDrivetrain extends SubsystemBase {
   private final Encoder leftEncoder = new Encoder(4, 5);
   private final Encoder rightEncoder = new Encoder(6, 7);
 
-  // Keep a filter for each side's driving speed.
-  private LinearFilter leftDriveSpeed = LinearFilter.singlePoleIIR(0.1, 0.02);
-  private LinearFilter rightDriveSpeed = LinearFilter.singlePoleIIR(0.1, 0.02);
+  // Limit the amount of change allowed per iteration for each sensor.
+  private SlewRateLimiter leftDriveSpeed = new SlewRateLimiter(100);
+  private SlewRateLimiter rightDriveSpeed = new SlewRateLimiter(100);
 
   private final FeedforwardSpeedController leftFFController;
   private final FeedforwardSpeedController rightFFController;
