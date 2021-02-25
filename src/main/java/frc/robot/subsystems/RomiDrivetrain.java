@@ -335,8 +335,11 @@ public class RomiDrivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("LeftSpeed", leftDriveSpeed.calculate(getLeftRate()));
-    SmartDashboard.putNumber("RightSpeed", rightDriveSpeed.calculate(getRightRate()));
+    SmartDashboard.putNumber("LeftSpeed", getLeftRate());
+    SmartDashboard.putNumber("RightSpeed", getRightRate());
+ 
+    SmartDashboard.putNumber("LeftSpeed-Smoothed", leftDriveSpeed.calculate(getLeftRate()));
+    SmartDashboard.putNumber("RightSpeed=Smoothed", rightDriveSpeed.calculate(getRightRate()));
  
     SmartDashboard.putNumber("LeftDistance", getLeftDistanceInch());
     SmartDashboard.putNumber("RightDistance", getRightDistanceInch());
