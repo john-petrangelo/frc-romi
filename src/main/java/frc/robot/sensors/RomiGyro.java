@@ -6,9 +6,11 @@ package frc.robot.sensors;
 
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDevice.Direction;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.hal.SimDouble;
 
-public class RomiGyro {
+public class RomiGyro extends SubsystemBase {
   private SimDouble m_simRateX;
   private SimDouble m_simRateY;
   private SimDouble m_simRateZ;
@@ -22,6 +24,8 @@ public class RomiGyro {
 
   /** Create a new RomiGyro. */
   public RomiGyro() {
+    super();
+
     SimDevice gyroSimDevice = SimDevice.create("Gyro:RomiGyro");
     if (gyroSimDevice != null) {
       gyroSimDevice.createBoolean("init", Direction.kOutput, true);
@@ -120,5 +124,18 @@ public class RomiGyro {
       m_angleYOffset = m_simAngleY.get();
       m_angleZOffset = m_simAngleZ.get();
     }
+  }
+
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    super.initSendable(builder);
+
+    builder.addDoubleProperty(".anglePitch", () -> getAnglePitch(), null);
+    builder.addDoubleProperty(".angleRoll", () -> getAngleRoll(), null);
+    builder.addDoubleProperty(".angleYaw", () -> getAngleYaw(), null);
+
+    builder.addDoubleProperty(".ratePitch", () -> getRatePitch(), null);
+    builder.addDoubleProperty(".rateRoll", () -> getRateRoll(), null);
+    builder.addDoubleProperty(".rateYaw", () -> getRateYaw(), null);
   }
 }
