@@ -1,10 +1,3 @@
-/*----------------------------------------------------------------------------*/
-/* Copyright (c) 2018-2020 FIRST. All Rights Reserved.                        */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-
 package frc.robot.subsystems;
 
 import edu.wpi.first.networktables.EntryListenerFlags;
@@ -98,20 +91,13 @@ public class RomiDrivetrain extends SubsystemBase {
       this.kVRightBack = kVRightBack;
       this.kPRightBack = kPRightBack;
     }
-
-    void dump() {
-      System.out.printf("Fwd  Left  (kS, kV, kP) = (%5.3f, %5.3f, %5.3f)\n", kSLeftFwd, kVLeftFwd, kPLeftFwd);
-      System.out.printf("Fwd  Right (kS, kV, kP) = (%5.3f, %5.3f, %5.3f)\n", kSRightFwd, kVRightFwd, kPRightFwd);
-      System.out.printf("Back Left  (kS, kV, kP) = (%5.3f, %5.3f, %5.3f)\n", kSLeftBack, kVLeftBack, kPLeftBack);
-      System.out.printf("Back Right (kS, kV, kP) = (%5.3f, %5.3f, %5.3f)\n", kSRightBack, kVRightBack, kPRightBack);
-    }
-  };
+  }
   
-    private final static Characteristics myData = new Characteristics(
-        0.4687, 0.2365, 0.0,
-        0.2993, 0.2701, 0.0,
-        0.5561, 0.2684, 0.0,
-        0.7771, 0.2531, 0.0);
+  private final static Characteristics myData = new Characteristics(
+      0.4687, 0.2365, 0.0,
+      0.2993, 0.2701, 0.0,
+      0.5561, 0.2684, 0.0,
+      0.7771, 0.2531, 0.0);
       
   // private Characteristics data = dataJan17Groomed;
   private Characteristics data = myData;
