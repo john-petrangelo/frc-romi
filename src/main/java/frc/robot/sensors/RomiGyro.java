@@ -36,39 +36,39 @@ public class RomiGyro {
   }
 
   /**
-   * Get the rate of turn in radians-per-second around the X-axis.
+   * Get the rate of turn in degrees-per-second around the X-axis.
    *
-   * @return rate of turn in radians-per-second
+   * @return rate of turn in degrees-per-second
    */
   public double getRateRoll() {
     if (m_simRateX != null) {
-      return -Math.toRadians(m_simRateX.get());
+      return -m_simRateX.get();
     }
 
     return 0.0;
   }
 
   /**
-   * Get the rate of turn in radians-per-second around the Y-axis.
+   * Get the rate of turn in degrees-per-second around the Y-axis.
    *
-   * @return rate of turn in radians-per-second
+   * @return rate of turn in degrees-per-second
    */
   public double getRatePitch() {
     if (m_simRateY != null) {
-      return -Math.toRadians(m_simRateY.get());
+      return -m_simRateY.get();
     }
 
     return 0.0;
   }
 
   /**
-   * Get the rate of turn in radians-per-second around the Z-axis.
+   * Get the rate of turn in degrees-per-second around the Z-axis.
    *
-   * @return rate of turn in radians-per-second
+   * @return rate of turn in degrees-per-second
    */
   public double getRateYaw() {
     if (m_simRateZ != null) {
-      return -Math.toRadians(m_simRateZ.get());
+      return -m_simRateZ.get();
     }
 
     return 0.0;
@@ -77,11 +77,11 @@ public class RomiGyro {
   /**
    * Get the currently reported angle around the X-axis.
    *
-   * @return current angle around X-axis in radians
+   * @return current angle around X-axis in degrees
    */
   public double getAngleRoll() {
     if (m_simAngleX != null) {
-      return -Math.toRadians(m_simAngleX.get() - m_angleXOffset);
+      return -(m_simAngleX.get() - m_angleXOffset);
     }
 
     return 0.0;
@@ -90,11 +90,11 @@ public class RomiGyro {
   /**
    * Get the currently reported angle around the X-axis.
    *
-   * @return current angle around Y-axis in radians
+   * @return current angle around Y-axis in degrees
    */
   public double getAnglePitch() {
     if (m_simAngleY != null) {
-      return -Math.toRadians(m_simAngleY.get() - m_angleYOffset);
+      return -(m_simAngleY.get() - m_angleYOffset);
     }
 
     return 0.0;
@@ -103,17 +103,17 @@ public class RomiGyro {
   /**
    * Get the currently reported angle around the Z-axis.
    *
-   * @return current angle around Z-axis in radians
+   * @return current angle around Z-axis in degrees
    */
   public double getAngleYaw() {
     if (m_simAngleZ != null) {
-      return -Math.toRadians(m_simAngleZ.get() - m_angleZOffset);
+      return -(m_simAngleZ.get() - m_angleZOffset);
     }
 
     return 0.0;
   }
 
-  /** Reset the gyro angles to 0. */
+  /** Reset the gyro angles to 0 degrees. */
   public void reset() {
     if (m_simAngleX != null) {
       m_angleXOffset = m_simAngleX.get();
