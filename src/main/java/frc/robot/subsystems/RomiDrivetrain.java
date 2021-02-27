@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.SlewRateLimiter;
 
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.speedcontrollers.FeedforwardSpeedController;
@@ -301,15 +302,6 @@ public class RomiDrivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("LeftSpeed", getLeftRate());
-    SmartDashboard.putNumber("RightSpeed", getRightRate());
- 
-    SmartDashboard.putNumber("LeftSpeed-Smoothed", leftDriveSpeed.calculate(getLeftRate()));
-    SmartDashboard.putNumber("RightSpeed=Smoothed", rightDriveSpeed.calculate(getRightRate()));
- 
-    SmartDashboard.putNumber("LeftDistance", getLeftDistanceInch());
-    SmartDashboard.putNumber("RightDistance", getRightDistanceInch());
-
     // Only the "active" differential drive feeds its speed controllers.
     // Explicitly feed all of them so nobody starves.
     diffDriveRaw.feed();
@@ -322,6 +314,20 @@ public class RomiDrivetrain extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
+  }
+
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    super.initSendable(builder);
+
+    builder.addDoubleProperty(".leftSpeed", () -> getLeftRate(), null);
+    builder.addDoubleProperty(".rightSpeed", () -> getRightRate(), null);
+
+    builder.addDoubleProperty(".leftSpeedSmoothed", () -> leftDriveSpeed.calculate(getLeftRate()), null);
+    builder.addDoubleProperty(".rightSpeedSmoothed", () -> rightDriveSpeed.calculate(getRightRate()), null);
+
+    builder.addDoubleProperty(".leftDistance", () -> getLeftDistanceInch(), null);
+    builder.addDoubleProperty(".rightDistance", () -> getRightDistanceInch(), null);
   }
 
   // Convert wheel encoder ticks to inches based on wheel physical dimensions.
