@@ -106,6 +106,8 @@ public class RomiDrivetrain extends SubsystemBase {
    * Creates a new RomiDrivetrain.
    */
   public RomiDrivetrain() {
+    super();
+    
     leftEncoder.setDistancePerPulse(ticksToInches(1));
     rightEncoder.setDistancePerPulse(ticksToInches(1));
 
