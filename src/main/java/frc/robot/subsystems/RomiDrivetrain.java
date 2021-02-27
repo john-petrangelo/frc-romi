@@ -150,7 +150,7 @@ public class RomiDrivetrain extends SubsystemBase {
     diffDriveNTVolts.setDeadband(0.12);
 
     // Default to "raw" mode.
-    setDiffDriveMode(DiffDriveMode.RAW);
+    setDiffDriveMode(DiffDriveMode.FF);
 
     setupNetworkTablesListeners();
   }
