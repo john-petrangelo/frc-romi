@@ -7,6 +7,8 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ArcadeDrive;
 import frc.robot.commands.DriveBackward;
 import frc.robot.commands.DriveForward;
+import frc.robot.commands.TurnDegreesWithGyro;
+import frc.robot.sensors.RomiGyro;
 import frc.robot.GrayBlueController.Axes;
 import frc.robot.GrayBlueController.Buttons;
 import frc.robot.subsystems.RomiDrivetrain;
@@ -20,6 +22,7 @@ import frc.robot.subsystems.RomiDrivetrain;
  */
 public class RobotContainer {
   private final RomiDrivetrain drivetrain = new RomiDrivetrain();
+  private final RomiGyro gyro = new RomiGyro();
 
   private final Joystick controller = new Joystick(0);
   private final JoystickButton buttonA = new JoystickButton(controller, Buttons.A.value);
@@ -29,6 +32,9 @@ public class RobotContainer {
   private final JoystickButton buttonStart = new JoystickButton(controller, Buttons.Start.value);
   private final JoystickButton povUp = new JoystickButton(controller, Buttons.POVup.value);
   private final JoystickButton povDown = new JoystickButton(controller, Buttons.POVdown.value);
+  private final JoystickButton povLeft = new JoystickButton(controller, Buttons.POVleft.value);
+  private final JoystickButton povRight = new JoystickButton(controller, Buttons.POVright.value);
+  private final JoystickButton leftBumper = new JoystickButton(controller, Buttons.BumperLeft.value);
   private final JoystickButton rightBumper = new JoystickButton(controller, Buttons.BumperRight.value);
 
   public RobotContainer() {
@@ -50,6 +56,8 @@ public class RobotContainer {
   private void configureButtonBindings() {
     povUp.whenPressed(new DriveForward(drivetrain, 12.0));
     povDown.whenPressed(new DriveBackward(drivetrain, 12.0));
+    povLeft.whenPressed(new TurnDegreesWithGyro(drivetrain, gyro, -73));
+    povRight.whenPressed(new TurnDegreesWithGyro(drivetrain, gyro, 73));
 
     buttonA.whenPressed(()     -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.PIDF));
     buttonB.whenPressed(()     -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.PIDF_PZ));
@@ -57,6 +65,8 @@ public class RobotContainer {
     buttonY.whenPressed(()     -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.RAW));
     rightBumper.whenPressed(() -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.NT_VOLTS));
     buttonStart.whenPressed(() -> drivetrain.publishParams());
+
+    leftBumper.whenPressed(() -> gyro.reset());
   }
 
   /**
