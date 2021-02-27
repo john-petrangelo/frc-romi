@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.sensors;
 
 import edu.wpi.first.hal.SimDevice;
@@ -119,6 +115,7 @@ public class RomiGyro extends SubsystemBase {
 
   /** Reset the gyro angles to 0 degrees. */
   public void reset() {
+    System.out.println("Reseting gyro");
     if (m_simAngleX != null) {
       m_angleXOffset = m_simAngleX.get();
       m_angleYOffset = m_simAngleY.get();
