@@ -19,7 +19,7 @@ import frc.robot.speedcontrollers.PIDSpeedController;
 public class RomiDrivetrain extends SubsystemBase {
   private static final double COUNTS_PER_REVOLUTION = 1440.0;
   private static final double WHEEL_DIAMETER_INCHES = 2.75;
-  private static final double MAX_SPEED = 20.0;
+  public static final double MAX_SPEED = 20.0;
 
   // The Romi has the left and right motors set to
   // PWM channels 0 and 1 respectively
