@@ -280,12 +280,24 @@ public class RomiDrivetrain extends SubsystemBase {
     rightEncoder.reset();
   }
 
-  public double getLeftDistanceInch() {
+  public double getLeftDistanceInches() {
     return ticksToInches(leftEncoder.get());
   }
 
-  public double getRightDistanceInch() {
+  public double getRightDistanceInches() {
     return ticksToInches(rightEncoder.get());
+  }
+
+  public double getMinDistanceInches() {
+    return ticksToInches(Math.min(leftEncoder.get(), rightEncoder.get()));
+  }
+
+  public double getMaxDistanceInches() {
+    return ticksToInches(Math.max(leftEncoder.get(), rightEncoder.get()));
+  }
+
+  public double getAvgDistanceInches() {
+    return ticksToInches((leftEncoder.get() + rightEncoder.get()) / 2);
   }
 
   /**
@@ -328,8 +340,8 @@ public class RomiDrivetrain extends SubsystemBase {
     builder.addDoubleProperty(".leftSpeedSmoothed", () -> leftDriveSpeed.calculate(getLeftRate()), null);
     builder.addDoubleProperty(".rightSpeedSmoothed", () -> rightDriveSpeed.calculate(getRightRate()), null);
 
-    builder.addDoubleProperty(".leftDistance", () -> getLeftDistanceInch(), null);
-    builder.addDoubleProperty(".rightDistance", () -> getRightDistanceInch(), null);
+    builder.addDoubleProperty(".leftDistance", () -> getLeftDistanceInches(), null);
+    builder.addDoubleProperty(".rightDistance", () -> getRightDistanceInches(), null);
   }
 
   // Convert wheel encoder ticks to inches based on wheel physical dimensions.

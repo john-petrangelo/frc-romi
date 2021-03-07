@@ -6,8 +6,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ArcadeDrive;
 import frc.robot.commands.DriveBackward;
-import frc.robot.commands.DriveForward;
+import frc.robot.commands.DriveDistance;
+import frc.robot.commands.DriveForwardWithGyro;
+import frc.robot.commands.DriveTrapezoid;
+import frc.robot.commands.TurnTrapezoid;
 import frc.robot.commands.TurnDegreesWithGyro;
+import frc.robot.commands.TurnToAngleWithPID;
 import frc.robot.sensors.RomiGyro;
 import frc.robot.GrayBlueController.Axes;
 import frc.robot.GrayBlueController.Buttons;
@@ -54,10 +58,19 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    povUp.whenPressed(new DriveForward(drivetrain, 12.0));
-    povDown.whenPressed(new DriveBackward(drivetrain, 12.0));
-    povLeft.whenPressed(new TurnDegreesWithGyro(drivetrain, gyro, -73));
-    povRight.whenPressed(new TurnDegreesWithGyro(drivetrain, gyro, 73));
+    povUp.whenPressed(new DriveDistance(36.0, drivetrain));
+    povDown.whenPressed(new DriveDistance(-36.0, drivetrain));
+    // povUp.whenPressed(new DriveForwardWithGyro(36.0, drivetrain, gyro));
+    // povDown.whenPressed(new DriveForwardWithGyro(-36.0, drivetrain, gyro));
+    // povUp.whenPressed(new DriveTrapezoid(36.0, drivetrain));
+    // povDown.whenPressed(new DriveTrapezoid(-36.0, drivetrain));
+
+    // povLeft.whenPressed(new TurnDegreesWithGyro(drivetrain, gyro, -73));
+    // povRight.whenPressed(new TurnDegreesWithGyro(drivetrain, gyro, 73));
+    // povLeft.whenPressed(new TurnToAngleWithPID(-90, drivetrain, gyro));
+    // povRight.whenPressed(new TurnToAngleWithPID(90, drivetrain, gyro));
+    povLeft.whenPressed(new TurnTrapezoid(-90.0, drivetrain, gyro));
+    povRight.whenPressed(new TurnTrapezoid(90.0, drivetrain, gyro));
 
     buttonA.whenPressed(()     -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.PIDF));
     buttonB.whenPressed(()     -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.PIDF_PZ));
@@ -75,11 +88,11 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new DriveForward(drivetrain, 24.0);
+    return new DriveDistance(24.0, drivetrain);
   }
 
   public Command getTestCommand() {
     // An ExampleCommand will run in autonomous
-    return new DriveBackward(drivetrain, 24.0);
+    return new DriveDistance(-24.0, drivetrain);
   }
 }
