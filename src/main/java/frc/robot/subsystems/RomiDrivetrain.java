@@ -81,6 +81,7 @@ public class RomiDrivetrain extends SubsystemBase {
       this.kSLeftFwd = kSLeftFwd;
       this.kVLeftFwd = kVLeftFwd;
       this.kPLeftFwd = kPLeftFwd;
+
       this.kSLeftBack = kSLeftBack;
       this.kVLeftBack = kVLeftBack;
       this.kPLeftBack = kPLeftBack;
@@ -88,6 +89,7 @@ public class RomiDrivetrain extends SubsystemBase {
       this.kSRightFwd = kSRightFwd;
       this.kVRightFwd = kVRightFwd;
       this.kPRightFwd = kPRightFwd;
+
       this.kSRightBack = kSRightBack;
       this.kVRightBack = kVRightBack;
       this.kPRightBack = kPRightBack;
@@ -95,10 +97,10 @@ public class RomiDrivetrain extends SubsystemBase {
   }
   
   private final static Characteristics myData = new Characteristics(
-      0.4687, 0.2365, 0.0,
-      0.2993, 0.2701, 0.0,
-      0.5561, 0.2684, 0.0,
-      0.7771, 0.2531, 0.0);
+      0.4687, 0.2381, 0.0,
+      0.2993, 0.2685 ,0.0,
+      0.5561, 0.2666, 0.0,
+      0.7771, 0.2545, 0.0);
       
   // private Characteristics data = dataJan17Groomed;
   private Characteristics data = myData;
