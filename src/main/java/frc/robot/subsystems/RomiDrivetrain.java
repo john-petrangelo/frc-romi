@@ -102,7 +102,6 @@ public class RomiDrivetrain extends SubsystemBase {
       0.5561, 0.2666, 0.0,
       0.7771, 0.2545, 0.0);
       
-  // private Characteristics data = dataJan17Groomed;
   private Characteristics data = myData;
 
   /**
@@ -151,7 +150,6 @@ public class RomiDrivetrain extends SubsystemBase {
     diffDrivePIDF.setDeadband(0.12);
     diffDriveNTVolts.setDeadband(0.12);
 
-    // Default to "raw" mode.
     setDiffDriveMode(DiffDriveMode.FF);
 
     setupNetworkTablesListeners();
