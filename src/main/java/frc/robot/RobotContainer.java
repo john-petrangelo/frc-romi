@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ArcadeDrive;
-import frc.robot.commands.DriveBackward;
 import frc.robot.commands.DriveDistance;
 import frc.robot.commands.DriveForwardWithGyro;
 import frc.robot.commands.DriveTrapezoid;
@@ -29,10 +28,11 @@ public class RobotContainer {
   private final RomiGyro gyro = new RomiGyro();
 
   private final Joystick controller = new Joystick(0);
-  private final JoystickButton buttonA = new JoystickButton(controller, Buttons.A.value);
-  private final JoystickButton buttonB = new JoystickButton(controller, Buttons.B.value);
-  private final JoystickButton buttonX = new JoystickButton(controller, Buttons.X.value);
-  private final JoystickButton buttonY = new JoystickButton(controller, Buttons.Y.value);
+  // private final JoystickButton buttonA = new JoystickButton(controller, Buttons.A.value);
+  // private final JoystickButton buttonB = new JoystickButton(controller, Buttons.B.value);
+  // private final JoystickButton buttonX = new JoystickButton(controller, Buttons.X.value);
+  // private final JoystickButton buttonY = new JoystickButton(controller, Buttons.Y.value);
+  private final JoystickButton buttonBack = new JoystickButton(controller, Buttons.Back.value);
   private final JoystickButton buttonStart = new JoystickButton(controller, Buttons.Start.value);
   private final JoystickButton povUp = new JoystickButton(controller, Buttons.POVup.value);
   private final JoystickButton povDown = new JoystickButton(controller, Buttons.POVdown.value);
@@ -72,14 +72,10 @@ public class RobotContainer {
     povLeft.whenPressed(new TurnTrapezoid(-90.0, drivetrain, gyro));
     povRight.whenPressed(new TurnTrapezoid(90.0, drivetrain, gyro));
 
-    buttonA.whenPressed(()     -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.PIDF));
-    buttonB.whenPressed(()     -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.PIDF_PZ));
-    buttonX.whenPressed(()     -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.FF));
-    buttonY.whenPressed(()     -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.RAW));
+    leftBumper.whenPressed(()  -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.FF));
     rightBumper.whenPressed(() -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.NT_VOLTS));
+    buttonBack.whenPressed(()  -> gyro.reset());
     buttonStart.whenPressed(() -> drivetrain.publishParams());
-
-    leftBumper.whenPressed(() -> gyro.reset());
   }
 
   /**
