@@ -7,6 +7,7 @@ import frc.robot.subsystems.RomiDrivetrain;
 
 public class DriveTrapezoid extends TrapezoidProfileCommand {
     private static final Constraints CONSTRAINTS = new TrapezoidProfile.Constraints(20, 80);
+    private RomiDrivetrain drivetrain;
           
     public DriveTrapezoid(double inches, RomiDrivetrain drivetrain) {
         super(
@@ -16,14 +17,18 @@ public class DriveTrapezoid extends TrapezoidProfileCommand {
             setpointState -> drivetrain.arcadeDrive(setpointState.velocity / RomiDrivetrain.MAX_SPEED, 0.0),
             drivetrain);
 
+        this.drivetrain = drivetrain;
+
         addRequirements(drivetrain);
-        setName("TurnTrapezoid(" + inches + ")");
+        setName("DriveTrapezoid(" + inches + ")");
     }
 
     @Override
     public void initialize() {
-        System.out.printf("%s initialize", getName());
         super.initialize();
+
+        System.out.printf("%s initialize", getName());
+        drivetrain.resetEncoders();
     }
 
     // Returns true when the command should end.
