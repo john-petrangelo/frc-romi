@@ -37,7 +37,9 @@ dependencies {
 
 // Set the websocket remote host (the Romi IP address).
 sim {
-  envVar "HALSIMWS_HOST", "10.0.0.2"
+//   envVar "HALSIMWS_HOST", "10.0.0.2"
+//   envVar "HALSIMWS_HOST", "wpilibpi.local"
+  envVar "HALSIMWS_HOST", "192.168.4.49"
 }
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
