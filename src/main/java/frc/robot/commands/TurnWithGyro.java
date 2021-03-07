@@ -4,19 +4,20 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.sensors.RomiGyro;
 import frc.robot.subsystems.RomiDrivetrain;
 
-public class TurnDegreesWithGyro extends CommandBase {
+public class TurnWithGyro extends CommandBase {
     private RomiDrivetrain drivetrain;
     private RomiGyro gyro;
-    private double angle;
+    private double degrees;
+    private final double SPEED = 0.2;
 
-    public TurnDegreesWithGyro(RomiDrivetrain drivetrain, RomiGyro gyro, double angle) {
+    public TurnWithGyro(double degrees, RomiDrivetrain drivetrain, RomiGyro gyro) {
         this.drivetrain = drivetrain;
         this.gyro = gyro;
-        this.angle = angle;
+        this.degrees = degrees;
 
         addRequirements(drivetrain);
         addRequirements(gyro);
-        setName("TurnDegreesWithGyro(" + angle + ")");
+        setName("TurnWithGyro(" + degrees + ")");
     }
 
     // Called when the command is initially scheduled.
@@ -30,7 +31,7 @@ public class TurnDegreesWithGyro extends CommandBase {
     @Override
     public void execute() {
         System.out.printf("%s execute\n", getName());
-        drivetrain.arcadeDrive(0.0, Math.signum(angle) * 0.3);
+        drivetrain.arcadeDrive(0.0, Math.signum(degrees) * SPEED);
     }
 
     // Called once the command ends or is interrupted.
@@ -41,7 +42,7 @@ public class TurnDegreesWithGyro extends CommandBase {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        boolean isFinished = Math.abs(gyro.getAngleYaw()) > Math.abs(angle);
+        boolean isFinished = Math.abs(gyro.getAngleYaw()) > Math.abs(degrees);
 
         System.out.printf("%s is %sfinished, degrees=%3.1f\n",
             getName(), isFinished ? "" : "not ", gyro.getAngleYaw());
