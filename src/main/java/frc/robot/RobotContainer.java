@@ -3,13 +3,14 @@ package frc.robot;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ArcadeDrive;
 import frc.robot.commands.DriveDistance;
 import frc.robot.commands.DriveForwardWithGyro;
 import frc.robot.commands.DriveTrapezoid;
 import frc.robot.commands.TurnTrapezoid;
-import frc.robot.commands.TurnDegreesWithGyro;
+import frc.robot.commands.TurnWithGyro;
 import frc.robot.commands.TurnToAngleWithPID;
 import frc.robot.sensors.RomiGyro;
 import frc.robot.GrayBlueController.Axes;
@@ -31,7 +32,7 @@ public class RobotContainer {
   // private final JoystickButton buttonA = new JoystickButton(controller, Buttons.A.value);
   // private final JoystickButton buttonB = new JoystickButton(controller, Buttons.B.value);
   // private final JoystickButton buttonX = new JoystickButton(controller, Buttons.X.value);
-  // private final JoystickButton buttonY = new JoystickButton(controller, Buttons.Y.value);
+  private final JoystickButton buttonY = new JoystickButton(controller, Buttons.Y.value);
   private final JoystickButton buttonBack = new JoystickButton(controller, Buttons.Back.value);
   private final JoystickButton buttonStart = new JoystickButton(controller, Buttons.Start.value);
   private final JoystickButton povUp = new JoystickButton(controller, Buttons.POVup.value);
@@ -65,17 +66,19 @@ public class RobotContainer {
     // povUp.whenPressed(new DriveTrapezoid(36.0, drivetrain));
     // povDown.whenPressed(new DriveTrapezoid(-36.0, drivetrain));
 
-    // povLeft.whenPressed(new TurnDegreesWithGyro(drivetrain, gyro, -73));
-    // povRight.whenPressed(new TurnDegreesWithGyro(drivetrain, gyro, 73));
+    povLeft.whenPressed(new TurnWithGyro(-73, drivetrain, gyro));
+    povRight.whenPressed(new TurnWithGyro(73, drivetrain, gyro));
     // povLeft.whenPressed(new TurnToAngleWithPID(-90, drivetrain, gyro));
     // povRight.whenPressed(new TurnToAngleWithPID(90, drivetrain, gyro));
-    povLeft.whenPressed(new TurnTrapezoid(-90.0, drivetrain, gyro));
-    povRight.whenPressed(new TurnTrapezoid(90.0, drivetrain, gyro));
+    // povLeft.whenPressed(new TurnTrapezoid(-90.0, drivetrain, gyro));
+    // povRight.whenPressed(new TurnTrapezoid(90.0, drivetrain, gyro));
 
     leftBumper.whenPressed(()  -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.FF));
     rightBumper.whenPressed(() -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.NT_VOLTS));
     buttonBack.whenPressed(()  -> gyro.reset());
     buttonStart.whenPressed(() -> drivetrain.publishParams());
+
+    buttonY.whenPressed(getAutonomousCommand());
   }
 
   /**
@@ -84,11 +87,23 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new DriveDistance(24.0, drivetrain);
+    Command cmds = new SequentialCommandGroup(
+      new DriveDistance(12, drivetrain),
+      new TurnWithGyro(90, drivetrain, gyro),
+      new DriveDistance(12, drivetrain),
+      new TurnWithGyro(-45, drivetrain, gyro),
+      new DriveDistance(12 * Math.sqrt(2), drivetrain),
+      new TurnWithGyro(45+90, drivetrain, gyro),
+      new DriveDistance(24, drivetrain),
+      new TurnWithGyro(90, drivetrain, gyro),
+      new DriveDistance(24, drivetrain),
+      new TurnWithGyro(90, drivetrain, gyro)
+    );
+
+    return cmds;
   }
 
   public Command getTestCommand() {
-    // An ExampleCommand will run in autonomous
-    return new DriveDistance(-24.0, drivetrain);
+    return new DriveDistance(12.0, drivetrain);
   }
 }
