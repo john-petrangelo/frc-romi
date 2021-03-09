@@ -77,6 +77,18 @@ public class RomiDrivetrain extends SubsystemBase {
       this.kSRightBack = kSRightBack;
       this.kVRightBack = kVRightBack;
     }
+
+    @Override
+    public String toString() {
+        return "Characteristics Left=[kSFwd=" + kSLeftFwd
+          + ", kVFwd=" + kVLeftFwd 
+          + ", kSBack=" + kSLeftBack
+          + ", kVBack=" + kVLeftBack
+          + "], Right=[kSFwd=" + kSRightFwd 
+          + ", kVFwd=" + kVRightFwd
+          + ", kSBack=" + kSRightBack
+          + ", kVBack=" + kVRightBack + "]";
+    }
   }
   
   private final static Characteristics myData = new Characteristics(
@@ -125,6 +137,7 @@ public class RomiDrivetrain extends SubsystemBase {
     final String driveModeKey = "Romi-O/DriveMode";
 
     System.out.println("New drive mode: " + mode.toString());
+    System.out.println(data);
     switch (mode) {
       case FF:
         activeDiffDrive = diffDriveFF;
