@@ -6,14 +6,16 @@ public class Pause extends CommandBase {
     private final long durationMS;
     private long startTimeMS = 0;
 
+    /**
+     * Create a command to pause for the specified number of seconds.
+     */
     public Pause(double seconds) {
         this.durationMS = (long)(seconds * 1000);
-        setName(String.format("Wait(%5.3fs)", seconds));
+        setName(String.format("Pause(%5.3fs)", seconds));
     }
 
     @Override
     public void initialize() {
-        System.out.printf("%s initialize\n", getName());
         startTimeMS = System.currentTimeMillis();
     }
 
