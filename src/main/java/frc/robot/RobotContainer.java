@@ -6,11 +6,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ArcadeDrive;
+import frc.robot.commands.CalibrateDrive;
 import frc.robot.commands.DriveDistance;
 import frc.robot.commands.DriveForwardWithGyro;
 import frc.robot.commands.DriveTrapezoid;
 import frc.robot.commands.TurnTrapezoid;
 import frc.robot.commands.TurnWithGyro;
+import frc.robot.commands.WriteMessage;
+import frc.robot.commands.Pause;
 import frc.robot.commands.TurnToAngleWithPID;
 import frc.robot.sensors.RomiGyro;
 import frc.robot.GrayBlueController.Axes;
@@ -78,7 +81,17 @@ public class RobotContainer {
     buttonBack.whenPressed(()  -> gyro.reset());
     buttonStart.whenPressed(() -> drivetrain.publishParams());
 
-    buttonY.whenPressed(getAutonomousCommand());
+    buttonY.whenPressed(
+      new SequentialCommandGroup(
+        new WriteMessage("Starting calibration sequence, will drive 12 inches then analyze the results"),
+        new DriveDistance(12, drivetrain),
+        new CalibrateDrive(drivetrain),
+        new Pause(0.3),
+        new WriteMessage("Settled for 300ms"),
+        new CalibrateDrive(drivetrain),
+        new WriteMessage("Calibration sequence complete")
+      )
+    );
   }
 
   /**
