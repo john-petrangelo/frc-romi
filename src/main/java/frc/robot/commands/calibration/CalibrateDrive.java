@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.commands.calibration;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.RomiDrivetrain;
