@@ -5,14 +5,8 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.calibration.CalibrateDrive;
-import frc.robot.commands.drive.ArcadeDrive;
-import frc.robot.commands.drive.DriveDistance;
-import frc.robot.commands.drive.DriveForwardWithGyro;
-import frc.robot.commands.drive.DriveTrapezoid;
-import frc.robot.commands.drive.TurnToAngleWithPID;
-import frc.robot.commands.drive.TurnTrapezoid;
-import frc.robot.commands.drive.TurnWithGyro;
+import frc.robot.commands.calibration.*;
+import frc.robot.commands.drive.*;
 import frc.robot.commands.WriteMessage;
 import frc.robot.commands.Pause;
 import frc.robot.sensors.RomiGyro;
@@ -85,6 +79,7 @@ public class RobotContainer {
       new SequentialCommandGroup(
         new WriteMessage("Starting calibration sequence, will drive 12 inches then analyze the results"),
         new DriveDistance(12, drivetrain),
+        new DriveStop(drivetrain),
         new CalibrateDrive(drivetrain),
         new Pause(0.3),
         new WriteMessage("Settled for 300ms"),
