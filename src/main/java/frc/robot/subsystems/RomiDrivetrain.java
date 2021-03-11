@@ -123,7 +123,7 @@ public class RomiDrivetrain extends SubsystemBase {
     diffDriveNTVolts = new DifferentialDrive(leftNTVoltsController, rightNTVoltsController);
 
     diffDriveFF.setMaxOutput(MAX_SPEED);
-    diffDriveNTVolts.setMaxOutput(MAX_SPEED);
+    diffDriveNTVolts.setMaxOutput(MAX_SPEED); // Ignored by FixedVoltsSpeedController
 
     diffDriveFF.setDeadband(0.12);
     diffDriveNTVolts.setDeadband(0.12);
@@ -214,6 +214,18 @@ public class RomiDrivetrain extends SubsystemBase {
     SmartDashboard.putNumber("ArcadeRotation", rotation);
 
     activeDiffDrive.arcadeDrive(speed, rotation, false);
+  }
+
+  public void voltDrive(double voltage) {
+    voltDrive(voltage, voltage);
+  }
+
+  public void voltDrive(double lVoltage, double rVoltage) {
+    SmartDashboard.putNumber("VoltDrive-L", lVoltage);
+    SmartDashboard.putNumber("VoltDrive-R", rVoltage);
+
+    leftMotor.setVoltage(lVoltage);
+    rightMotor.setVoltage(-rVoltage);
   }
 
   public void resetEncoders() {

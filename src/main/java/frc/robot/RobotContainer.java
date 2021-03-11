@@ -28,7 +28,7 @@ public class RobotContainer {
   private final Joystick controller = new Joystick(0);
   // private final JoystickButton buttonA = new JoystickButton(controller, Buttons.A.value);
   // private final JoystickButton buttonB = new JoystickButton(controller, Buttons.B.value);
-  // private final JoystickButton buttonX = new JoystickButton(controller, Buttons.X.value);
+  private final JoystickButton buttonX = new JoystickButton(controller, Buttons.X.value);
   private final JoystickButton buttonY = new JoystickButton(controller, Buttons.Y.value);
   private final JoystickButton buttonBack = new JoystickButton(controller, Buttons.Back.value);
   private final JoystickButton buttonStart = new JoystickButton(controller, Buttons.Start.value);
@@ -75,6 +75,7 @@ public class RobotContainer {
     buttonBack.whenPressed(()  -> gyro.reset());
     buttonStart.whenPressed(() -> drivetrain.publishParams());
 
+    buttonX.whenPressed(new FindMinVoltage(drivetrain));
     buttonY.whenPressed(
       new SequentialCommandGroup(
         new WriteMessage("Starting calibration sequence, will drive 12 inches then analyze the results"),
