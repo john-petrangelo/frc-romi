@@ -1,24 +1,53 @@
 package frc.robot.commands.calibration;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.RomiDrivetrain;
 
 public class FindMinVoltage extends CommandBase {
-    private static final long STEP_DURATION_MS = 100;
+    public enum Side {
+        LEFT, RIGHT
+    };
+
+    private static final long STEP_DURATION_MS = 200;
     private static final double STEP_SIZE_VOLTS = 0.05;
 
     private RomiDrivetrain drivetrain;
     private long stepStartTime;
     private double currentStepVoltage;
-    private double leftMinVoltage = -1.0;
-    private double rightMinVoltage = -1.0;
+    private double minVoltage = -1.0;
+
+    private Supplier<Double> distance;
+    private Consumer<Double> drive;
 
     /**
      * Creates a command finds the minimum voltage needed to move the robot.
      */
-    public FindMinVoltage(RomiDrivetrain drivetrain) {
+    public FindMinVoltage(Side side, RomiDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
         addRequirements(drivetrain);
+
+        switch(side) {
+        case LEFT:
+            distance = drivetrain::getLeftDistanceInches;
+            drive = drivetrain::voltDriveLeft;
+            break;
+        case RIGHT:
+            distance = drivetrain::getRightDistanceInches;
+            drive = drivetrain::voltDriveRight;
+            drive = drive.andThen(drivetrain::voltDriveLeft);
+            break;
+        }
+
+        Consumer<Double> c1 = Math::abs;
+        Consumer<Double> c2 = Math::abs;
+        Consumer<Double> c3 = c1.andThen(c2);
+
+        c3.accept(5.0);
+
+        setName(String.format("%s(%s)", getName(), side.toString()));
     }
 
     @Override
@@ -26,8 +55,7 @@ public class FindMinVoltage extends CommandBase {
         super.initialize();
         stepStartTime = System.currentTimeMillis();
         currentStepVoltage = STEP_SIZE_VOLTS;
-        leftMinVoltage = -1.0;
-        rightMinVoltage = -1.0;
+        minVoltage = -1.0;
 
         drivetrain.resetEncoders();
     }
@@ -36,37 +64,39 @@ public class FindMinVoltage extends CommandBase {
     public void execute() {
         // If it's too soon, don't bother checking.
         long now = System.currentTimeMillis();
-        System.out.printf("%3d %s V=%5.3f L=%5.3f R=%5.3f\n",
-            now % 1000, getName(), currentStepVoltage,
-            drivetrain.getLeftDistanceInches(), drivetrain.getRightDistanceInches());
 
-        if (leftMinVoltage < 0.0 && drivetrain.getLeftDistanceInches() > 0.0) {
-            leftMinVoltage = currentStepVoltage;
+        // Did we move?
+        if (minVoltage < 0.0 && distance.get() > 0.0) {
+            System.out.printf("%3d %s Moved voltage V=%5.3f dist=%5.3f\n",
+                now % 1000, getName(), currentStepVoltage,
+                distance.get());
+            minVoltage = currentStepVoltage;
+            return;
         }
 
-        if (rightMinVoltage < 0.0 && drivetrain.getRightDistanceInches() > 0.0) {
-            rightMinVoltage = currentStepVoltage;
-        }
-
+        // Have we tried this voltage long enough?
         if (now >= stepStartTime + STEP_DURATION_MS) {
             stepStartTime += STEP_DURATION_MS;
             currentStepVoltage += STEP_SIZE_VOLTS;
+
+            System.out.printf("%3d %s Stepping voltage V=%5.3f dist=%5.3f\n",
+                now % 1000, getName(), currentStepVoltage,
+                distance.get());
         }
 
-        drivetrain.voltDrive(currentStepVoltage, 0.0);
+        drive.accept(currentStepVoltage);
         return;
     }
 
     @Override
     public void end(boolean interrupted) {
-        System.out.printf("%s is finished, leftMinVoltage=%5.3f, rightMinVoltage=%5.3f\n",
-                getName(), leftMinVoltage, rightMinVoltage);
+        System.out.printf("%s is finished, minVoltage=%5.3f\n", getName(), minVoltage);
         drivetrain.arcadeDrive(0.0, 0.0);
     }
 
     @Override
     public boolean isFinished() {
-        boolean isFinished = leftMinVoltage > 0.0 && rightMinVoltage > 0.0;
+        boolean isFinished = minVoltage > 0.0;
 
         return isFinished;
     }
