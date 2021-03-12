@@ -41,12 +41,6 @@ public class FindMinVoltage extends CommandBase {
             break;
         }
 
-        Consumer<Double> c1 = Math::abs;
-        Consumer<Double> c2 = Math::abs;
-        Consumer<Double> c3 = c1.andThen(c2);
-
-        c3.accept(5.0);
-
         setName(String.format("%s(%s)", getName(), side.toString()));
     }
 
