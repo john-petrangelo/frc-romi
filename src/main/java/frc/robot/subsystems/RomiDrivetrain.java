@@ -216,16 +216,19 @@ public class RomiDrivetrain extends SubsystemBase {
     activeDiffDrive.arcadeDrive(speed, rotation, false);
   }
 
-  public void voltDrive(double voltage) {
-    voltDrive(voltage, voltage);
+  public void voltDriveLeft(double voltage) {
+    SmartDashboard.putNumber("VoltDrive-L", voltage);
+    leftMotor.setVoltage(voltage);
+  }
+
+  public void voltDriveRight(double voltage) {
+    SmartDashboard.putNumber("VoltDrive-R", voltage);
+    rightMotor.setVoltage(-voltage);
   }
 
   public void voltDrive(double lVoltage, double rVoltage) {
-    SmartDashboard.putNumber("VoltDrive-L", lVoltage);
-    SmartDashboard.putNumber("VoltDrive-R", rVoltage);
-
-    leftMotor.setVoltage(lVoltage);
-    rightMotor.setVoltage(-rVoltage);
+    voltDriveLeft(lVoltage);
+    voltDriveRight(rVoltage);
   }
 
   public void resetEncoders() {
