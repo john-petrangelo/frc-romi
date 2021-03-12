@@ -23,7 +23,10 @@ public class FindMinVoltage extends CommandBase {
     private Consumer<Double> drive;
 
     /**
-     * Creates a command finds the minimum voltage needed to move the robot.
+     * Creates a command that finds the minimum voltage needed to move the robot.
+     * <p>
+     * Starts with very low voltage and slow ramp up until
+     * motion is detected. Once motion is detected, stop and report the voltage.
      */
     public FindMinVoltage(Side side, RomiDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
@@ -37,7 +40,6 @@ public class FindMinVoltage extends CommandBase {
         case RIGHT:
             distance = drivetrain::getRightDistanceInches;
             drive = drivetrain::voltDriveRight;
-            drive = drive.andThen(drivetrain::voltDriveLeft);
             break;
         }
 
