@@ -31,13 +31,13 @@ public class RobotContainer {
   private final JoystickButton buttonX = new JoystickButton(controller, Buttons.X.value);
   private final JoystickButton buttonY = new JoystickButton(controller, Buttons.Y.value);
   private final JoystickButton buttonBack = new JoystickButton(controller, Buttons.Back.value);
-  private final JoystickButton buttonStart = new JoystickButton(controller, Buttons.Start.value);
+  // private final JoystickButton buttonStart = new JoystickButton(controller, Buttons.Start.value);
   private final JoystickButton povUp = new JoystickButton(controller, Buttons.POVup.value);
   private final JoystickButton povDown = new JoystickButton(controller, Buttons.POVdown.value);
   private final JoystickButton povLeft = new JoystickButton(controller, Buttons.POVleft.value);
   private final JoystickButton povRight = new JoystickButton(controller, Buttons.POVright.value);
-  private final JoystickButton leftBumper = new JoystickButton(controller, Buttons.BumperLeft.value);
-  private final JoystickButton rightBumper = new JoystickButton(controller, Buttons.BumperRight.value);
+  // private final JoystickButton leftBumper = new JoystickButton(controller, Buttons.BumperLeft.value);
+  // private final JoystickButton rightBumper = new JoystickButton(controller, Buttons.BumperRight.value);
 
   public RobotContainer() {
     // The default command is run when no other commands are active.
@@ -70,10 +70,7 @@ public class RobotContainer {
     // povLeft.whenPressed(new TurnTrapezoid(-90.0, drivetrain, gyro));
     // povRight.whenPressed(new TurnTrapezoid(90.0, drivetrain, gyro));
 
-    leftBumper.whenPressed(()  -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.FF));
-    rightBumper.whenPressed(() -> drivetrain.setDiffDriveMode(RomiDrivetrain.DiffDriveMode.NT_VOLTS));
     buttonBack.whenPressed(()  -> gyro.reset());
-    buttonStart.whenPressed(() -> drivetrain.publishParams());
 
     buttonX.whenPressed(new FindMinVoltage(FindMinVoltage.Side.LEFT, drivetrain));
     buttonB.whenPressed(new FindMinVoltage(FindMinVoltage.Side.RIGHT, drivetrain));
