@@ -13,6 +13,8 @@ import frc.robot.speedcontrollers.FeedforwardSpeedController;
 public class RomiDrivetrain extends SubsystemBase {
   private static final double COUNTS_PER_REVOLUTION = 1440.0;
   private static final double WHEEL_DIAMETER_INCHES = 2.75;
+  private static final double INCHES_PER_TICK = Math.PI * WHEEL_DIAMETER_INCHES / COUNTS_PER_REVOLUTION;
+
   public static final double MAX_SPEED = 20.0;
 
   // The Romi has the left and right motors set to
@@ -92,8 +94,8 @@ public class RomiDrivetrain extends SubsystemBase {
   public RomiDrivetrain() {
     super();
     
-    leftEncoder.setDistancePerPulse(ticksToInches(1));
-    rightEncoder.setDistancePerPulse(ticksToInches(1));
+    leftEncoder.setDistancePerPulse(INCHES_PER_TICK);
+    rightEncoder.setDistancePerPulse(INCHES_PER_TICK);
 
     // Create the speed controllers used for the various test modes.
     leftFFController = new FeedforwardSpeedController("L", leftMotor,
@@ -140,23 +142,23 @@ public class RomiDrivetrain extends SubsystemBase {
   }
 
   public double getLeftDistanceInches() {
-    return ticksToInches(leftEncoder.get());
+    return leftEncoder.getDistance();
   }
 
   public double getRightDistanceInches() {
-    return ticksToInches(rightEncoder.get());
+    return rightEncoder.getDistance();
   }
 
   public double getMinDistanceInches() {
-    return ticksToInches(Math.min(leftEncoder.get(), rightEncoder.get()));
+    return Math.min(leftEncoder.getDistance(), rightEncoder.getDistance());
   }
 
   public double getMaxDistanceInches() {
-    return ticksToInches(Math.max(leftEncoder.get(), rightEncoder.get()));
+    return Math.max(leftEncoder.getDistance(), rightEncoder.getDistance());
   }
 
   public double getAvgDistanceInches() {
-    return ticksToInches((leftEncoder.get() + rightEncoder.get()) / 2);
+    return (leftEncoder.getDistance() + rightEncoder.getDistance() / 2);
   }
 
   /**
@@ -185,10 +187,5 @@ public class RomiDrivetrain extends SubsystemBase {
 
     builder.addDoubleProperty(".leftDistance", () -> getLeftDistanceInches(), null);
     builder.addDoubleProperty(".rightDistance", () -> getRightDistanceInches(), null);
-  }
-
-  // Convert wheel encoder ticks to inches based on wheel physical dimensions.
-  private double ticksToInches(double ticks) {
-    return Math.PI * WHEEL_DIAMETER_INCHES * (ticks / COUNTS_PER_REVOLUTION);
   }
 }
