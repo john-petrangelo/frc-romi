@@ -72,19 +72,21 @@ public class RobotContainer {
 
     buttonBack.whenPressed(()  -> gyro.reset());
 
-    buttonX.whenPressed(new FindMinVoltage(FindMinVoltage.Side.LEFT, drivetrain));
-    buttonB.whenPressed(new FindMinVoltage(FindMinVoltage.Side.RIGHT, drivetrain));
-    buttonY.whenPressed(
-      new SequentialCommandGroup(
-        new WriteMessage("Starting calibration sequence, will drive 12 inches then analyze the results"),
-        new DriveDistance(12, drivetrain),
-        new DriveStop(drivetrain),
-        new CalibrateDrive(drivetrain),
-        new Pause(0.3),
-        new WriteMessage("Settled for 300ms"),
-        new CalibrateDrive(drivetrain),
-        new WriteMessage("Calibration sequence complete")
-      )
+    buttonX.whenPressed(new SequentialCommandGroup(
+      new FindMinVoltage(FindMinVoltage.Side.LEFT_FWD, drivetrain),
+      new FindMinVoltage(FindMinVoltage.Side.LEFT_BACK, drivetrain),
+      new FindMinVoltage(FindMinVoltage.Side.RIGHT_FWD, drivetrain),
+      new FindMinVoltage(FindMinVoltage.Side.RIGHT_BACK, drivetrain))
+    );
+    buttonY.whenPressed(new SequentialCommandGroup(
+      new WriteMessage("Starting calibration sequence, will drive 12 inches then analyze the results"),
+      new DriveDistance(12, drivetrain),
+      new DriveStop(drivetrain),
+      new CalibrateDrive(drivetrain),
+      new Pause(0.3),
+      new WriteMessage("Settled for 300ms"),
+      new CalibrateDrive(drivetrain),
+      new WriteMessage("Calibration sequence complete"))
     );
   }
 
