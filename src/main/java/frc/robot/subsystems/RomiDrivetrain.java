@@ -1,8 +1,5 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.networktables.EntryListenerFlags;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SlewRateLimiter;
 
@@ -12,7 +9,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.speedcontrollers.FeedforwardSpeedController;
-import frc.robot.speedcontrollers.FixedVoltsSpeedController;
 
 public class RomiDrivetrain extends SubsystemBase {
   private static final double COUNTS_PER_REVOLUTION = 1440.0;
@@ -36,17 +32,8 @@ public class RomiDrivetrain extends SubsystemBase {
   private final FeedforwardSpeedController leftFFController;
   private final FeedforwardSpeedController rightFFController;
 
-  private final FixedVoltsSpeedController leftNTVoltsController;
-  private final FixedVoltsSpeedController rightNTVoltsController;
-
-  // Set up the differential drive controllers.
-  private final DifferentialDrive diffDriveFF;
-  private final DifferentialDrive diffDriveNTVolts;
-  private DifferentialDrive activeDiffDrive;
-
-  public enum DiffDriveMode {
-    FF, NT_VOLTS
-  }
+  // Set up the differential drive controller.
+  private final DifferentialDrive diffDrive;
 
   private static class Characteristics {
     double kSLeftFwd;
@@ -115,115 +102,31 @@ public class RomiDrivetrain extends SubsystemBase {
       data.kSRightBack, data.kVRightBack, data.kSRightFwd, data.kVRightFwd);
       // data.kSRightFwd, data.kVRightFwd, data.kSRightBack, data.kVRightBack);
 
-    leftNTVoltsController = new FixedVoltsSpeedController("L", leftMotor, leftEncoder::getRate, 4.0);
-    rightNTVoltsController = new FixedVoltsSpeedController("R", rightMotor, rightEncoder::getRate, 4.0);
-
     // Set up the differential drive controllers for the various test modes.
-    diffDriveFF = new DifferentialDrive(leftFFController, rightFFController);
-    diffDriveNTVolts = new DifferentialDrive(leftNTVoltsController, rightNTVoltsController);
+    diffDrive = new DifferentialDrive(leftFFController, rightFFController);
+    diffDrive.setMaxOutput(MAX_SPEED);
+    diffDrive.setDeadband(0.12);
 
-    diffDriveFF.setMaxOutput(MAX_SPEED);
-    diffDriveNTVolts.setMaxOutput(MAX_SPEED); // Ignored by FixedVoltsSpeedController
-
-    diffDriveFF.setDeadband(0.12);
-    diffDriveNTVolts.setDeadband(0.12);
-
-    setDiffDriveMode(DiffDriveMode.FF);
-
-    setupNetworkTablesListeners();
-  }
-
-  public void setDiffDriveMode(DiffDriveMode mode) {
-    final String driveModeKey = "Romi-O/DriveMode";
-
-    System.out.println("New drive mode: " + mode.toString());
-    System.out.println(data);
-    switch (mode) {
-      case FF:
-        activeDiffDrive = diffDriveFF;
-        leftFFController.setParameters (data.kSLeftFwd,   data.kVLeftFwd,   data.kSLeftBack, data.kVLeftBack);
-        rightFFController.setParameters(data.kSRightBack, data.kVRightBack, data.kSRightFwd, data.kVRightFwd);
-        SmartDashboard.putString(driveModeKey, "FF");
-        break;
-      case NT_VOLTS:
-        activeDiffDrive = diffDriveNTVolts;
-        double volts = SmartDashboard.getNumber("SetVolts", 0.0);
-        leftNTVoltsController.setParameters(volts);
-        rightNTVoltsController.setParameters(volts);
-        SmartDashboard.putString(driveModeKey, "NT Volts");
-        break;
-    }
-    
     resetEncoders();
-  }
-
-  private void setupNetworkTablesListeners() {
-    NetworkTableInstance nti = NetworkTableInstance.getDefault();
-    NetworkTable ntTable = nti.getTable("SmartDashboard/Romi-O");
-
-    ntTable.addEntryListener((table, key, entry, value, flags) -> {
-      System.out.println("Characterization data changed, " + key + ": " + value.getValue());
-      if (key.startsWith("drive-")) {
-        switch (key) {
-          case "drive-left-fwd-kS":
-            data.kSLeftFwd = value.getDouble();
-            break;
-          case "drive-left-fwd-kV":
-            data.kVLeftFwd = value.getDouble();
-            break;
-          case "drive-left-back-kS":
-            data.kSLeftBack = value.getDouble();
-            break;
-          case "drive-left-back-kV":
-            data.kVLeftBack = value.getDouble();
-            break;
-          case "drive-right-fwd-kS":
-            data.kSRightFwd = value.getDouble();
-            break;
-          case "drive-right-fwd-kV":
-            data.kVRightFwd = value.getDouble();
-            break;
-          case "drive-right-back-kS":
-            data.kSRightBack = value.getDouble();
-            break;
-          case "drive-right-back-kV":
-            data.kVRightBack = value.getDouble();
-            break;
-        }
-      }
-    }, EntryListenerFlags.kUpdate);
-  }
-
-  public void publishParams() {
-    String prefix = "Romi-O/";
-    SmartDashboard.putNumber(prefix + "drive-left-fwd-kS", data.kSLeftFwd);
-    SmartDashboard.putNumber(prefix + "drive-left-fwd-kV", data.kVLeftFwd);
-
-    SmartDashboard.putNumber(prefix + "drive-left-back-kS", data.kSLeftBack);
-    SmartDashboard.putNumber(prefix + "drive-left-back-kV", data.kVLeftBack);
-
-    SmartDashboard.putNumber(prefix + "drive-right-fwd-kS", data.kSRightFwd);
-    SmartDashboard.putNumber(prefix + "drive-right-fwd-kV", data.kVRightFwd);
-
-    SmartDashboard.putNumber(prefix + "drive-right-back-kS", data.kSRightBack);
-    SmartDashboard.putNumber(prefix + "drive-right-back-kV", data.kVRightBack);
   }
 
   public void arcadeDrive(double speed, double rotation) {
     SmartDashboard.putNumber("ArcadeSpeed", speed);
     SmartDashboard.putNumber("ArcadeRotation", rotation);
 
-    activeDiffDrive.arcadeDrive(speed, rotation, false);
+    diffDrive.arcadeDrive(speed, rotation, false);
   }
 
   public void voltDriveLeft(double voltage) {
     SmartDashboard.putNumber("VoltDrive-L", voltage);
     leftMotor.setVoltage(voltage);
+    diffDrive.feed();
   }
 
   public void voltDriveRight(double voltage) {
     SmartDashboard.putNumber("VoltDrive-R", voltage);
     rightMotor.setVoltage(-voltage);
+    diffDrive.feed();
   }
 
   public void voltDrive(double lVoltage, double rVoltage) {
@@ -257,30 +160,17 @@ public class RomiDrivetrain extends SubsystemBase {
   }
 
   /**
-   * Returns the left motor rate in inches.
+   * Returns the left motor rate in inches per second.
    */
   public double getLeftRate() {
     return leftEncoder.getRate();
   }
 
   /**
-   * Returns the right motor rate in inches.
+   * Returns the right motor rate in inches per second.
    */
   public double getRightRate() {
     return rightEncoder.getRate();
-  }
-
-  @Override
-  public void periodic() {
-    // Only the "active" differential drive feeds its speed controllers.
-    // Explicitly feed all of them so nobody starves.
-    diffDriveFF.feed();
-    diffDriveNTVolts.feed();
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
   }
 
   @Override
