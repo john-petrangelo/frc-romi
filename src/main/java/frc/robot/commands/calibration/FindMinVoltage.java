@@ -3,12 +3,13 @@ package frc.robot.commands.calibration;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.RomiDrivetrain;
 
 public class FindMinVoltage extends CommandBase {
     public enum Side {
-        LEFT, RIGHT
+        LEFT_FWD, LEFT_BACK, RIGHT_FWD, RIGHT_BACK
     };
 
     private static final long STEP_DURATION_MS = 200;
@@ -17,7 +18,6 @@ public class FindMinVoltage extends CommandBase {
     private RomiDrivetrain drivetrain;
     private long stepStartTime;
     private double currentStepVoltage;
-    private double minVoltage = -1.0;
 
     private Supplier<Double> distance;
     private Consumer<Double> drive;
@@ -33,13 +33,21 @@ public class FindMinVoltage extends CommandBase {
         addRequirements(drivetrain);
 
         switch(side) {
-        case LEFT:
-            distance = drivetrain::getLeftDistanceInches;
-            drive = drivetrain::voltDriveLeft;
+            case LEFT_FWD:
+            distance = () -> drivetrain.getLeftDistanceInches();
+            drive = (volts) -> drivetrain.voltDriveLeft(volts);
             break;
-        case RIGHT:
-            distance = drivetrain::getRightDistanceInches;
-            drive = drivetrain::voltDriveRight;
+        case LEFT_BACK:
+            distance = () -> -drivetrain.getLeftDistanceInches();
+            drive = (volts) -> drivetrain.voltDriveLeft(-volts);
+            break;
+        case RIGHT_FWD:
+            distance = () -> drivetrain.getRightDistanceInches();
+            drive = (volts) -> drivetrain.voltDriveRight(volts);
+            break;
+        case RIGHT_BACK:
+            distance = () -> -drivetrain.getRightDistanceInches();
+            drive = (volts) -> drivetrain.voltDriveRight(-volts);
             break;
         }
 
@@ -50,8 +58,7 @@ public class FindMinVoltage extends CommandBase {
     public void initialize() {
         super.initialize();
         stepStartTime = System.currentTimeMillis();
-        currentStepVoltage = STEP_SIZE_VOLTS;
-        minVoltage = -1.0;
+        currentStepVoltage = 0.0;
 
         drivetrain.resetEncoders();
     }
@@ -60,15 +67,6 @@ public class FindMinVoltage extends CommandBase {
     public void execute() {
         // If it's too soon, don't bother checking.
         long now = System.currentTimeMillis();
-
-        // Did we move?
-        if (minVoltage < 0.0 && distance.get() > 0.0) {
-            System.out.printf("%3d %s Moved voltage V=%5.3f dist=%5.3f\n",
-                now % 1000, getName(), currentStepVoltage,
-                distance.get());
-            minVoltage = currentStepVoltage;
-            return;
-        }
 
         // Have we tried this voltage long enough?
         if (now >= stepStartTime + STEP_DURATION_MS) {
@@ -86,14 +84,15 @@ public class FindMinVoltage extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        System.out.printf("%s is finished, minVoltage=%5.3f\n", getName(), minVoltage);
+        System.out.printf("%s end voltage=%5.3f distance=%5.3f\n",
+            getName(), currentStepVoltage, distance.get());
+        SmartDashboard.putNumber("Calibration/" + getName(), currentStepVoltage);
+
         drivetrain.arcadeDrive(0.0, 0.0);
     }
 
     @Override
     public boolean isFinished() {
-        boolean isFinished = minVoltage > 0.0;
-
-        return isFinished;
+        return distance.get() > 0.0;
     }
 }
