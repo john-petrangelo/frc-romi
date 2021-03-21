@@ -78,6 +78,12 @@ public class RobotContainer {
       new FindMinVoltage(FindMinVoltage.Side.RIGHT_FWD, drivetrain),
       new FindMinVoltage(FindMinVoltage.Side.RIGHT_BACK, drivetrain))
     );
+    buttonB.whenPressed(new SequentialCommandGroup(
+      new FindFFkS(FindFFkS.Side.LEFT_FWD, drivetrain))
+      // new FindMinVoltage(FindMinVoltage.Side.LEFT_BACK, drivetrain),
+      // new FindMinVoltage(FindMinVoltage.Side.RIGHT_FWD, drivetrain),
+      // new FindMinVoltage(FindMinVoltage.Side.RIGHT_BACK, drivetrain))
+    );
     buttonY.whenPressed(new SequentialCommandGroup(
       new WriteMessage("Starting calibration sequence, will drive 12 inches then analyze the results"),
       new DriveDistance(12, drivetrain),

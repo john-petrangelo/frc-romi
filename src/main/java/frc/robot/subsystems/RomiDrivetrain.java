@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.sensors.EncoderEstimater;
 import frc.robot.speedcontrollers.FeedforwardSpeedController;
 
 public class RomiDrivetrain extends SubsystemBase {
@@ -26,6 +27,7 @@ public class RomiDrivetrain extends SubsystemBase {
   // to use DIO pins 4/5 and 6/7 for the left and right
   private final Encoder leftEncoder = new Encoder(4, 5);
   private final Encoder rightEncoder = new Encoder(6, 7);
+  private final EncoderEstimater leftEstimatingEncoder = new EncoderEstimater(leftEncoder);
 
   // Limit the amount of change allowed per iteration for each sensor.
   private SlewRateLimiter leftDriveSpeed = new SlewRateLimiter(100);
@@ -145,6 +147,10 @@ public class RomiDrivetrain extends SubsystemBase {
     return leftEncoder.getDistance();
   }
 
+  public double getLeftEstDistanceInches() {
+    return leftEstimatingEncoder.getDistance();
+  }
+
   public double getRightDistanceInches() {
     return rightEncoder.getDistance();
   }
@@ -187,5 +193,10 @@ public class RomiDrivetrain extends SubsystemBase {
 
     builder.addDoubleProperty(".leftDistance", () -> getLeftDistanceInches(), null);
     builder.addDoubleProperty(".rightDistance", () -> getRightDistanceInches(), null);
+  }
+
+  @Override
+  public void periodic() {
+   leftEstimatingEncoder.update();
   }
 }

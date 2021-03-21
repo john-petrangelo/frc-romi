@@ -8,6 +8,7 @@ public class EncoderEstimater {
 
     private long lastKnownDistanceTime;
     private double lastKnownDistance;
+    private double lastKnownRate;
 
     private double modelDistance;
     private double modelRate;
@@ -18,7 +19,11 @@ public class EncoderEstimater {
         reset();
 
         lastKnownDistanceTime = System.currentTimeMillis();
+
         lastKnownDistance = encoder.getDistance();
+        lastKnownRate = encoder.getRate();
+
+        modelDistance = 0.0;
         modelRate = 0.0;
         modelAccel = 0.0;
     }
@@ -29,15 +34,21 @@ public class EncoderEstimater {
     public void update() {
         final long now = System.currentTimeMillis();
         final double dt = (now - lastKnownDistanceTime) / 1000.0;
-        final double newDistance = encoder.getDistance();
+        final double encoderDistance = encoder.getDistance();
         
-        if (newDistance != lastKnownDistance) {
-            modelDistance = newDistance;
-            modelRate = (newDistance - lastKnownDistance) / dt;
-            lastKnownDistance = newDistance;
+        if (encoderDistance != lastKnownDistance) {
+            // New encoder distance available. Update the model using the measured value.
+            modelDistance = encoderDistance;
+            modelRate = (modelDistance - lastKnownDistance) / dt;
+            modelAccel = (modelRate - lastKnownRate) / dt;
+
+            lastKnownRate = modelRate;
+            lastKnownDistance = modelDistance;
             lastKnownDistanceTime = now;
         } else {
+            // Encoder value didn't change, estimate new model values.
             modelDistance = lastKnownDistance + modelRate * dt;
+            modelRate = lastKnownRate + modelAccel * dt;
         }
 
         System.out.println(String.format("DATA,%d,%5.3f,%5.3f,%5.3f,%5.3f,%5.3f",
