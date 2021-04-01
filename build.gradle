@@ -18,7 +18,6 @@ dependencies {
     nativeZip wpi.deps.wpilibJni(wpi.platforms.roborio) // From characterization
     nativeDesktopZip wpi.deps.wpilibJni(wpi.platforms.desktop)
 
-
     implementation wpi.deps.vendor.java()
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio) // From characterization
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
@@ -33,6 +32,9 @@ dependencies {
     // Websocket extensions require additional configuration.
     // simulation wpi.deps.sim.ws_server(wpi.platforms.desktop, false)
     simulation wpi.deps.sim.ws_client(wpi.platforms.desktop, false)
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
 
 // Set the websocket remote host (the Romi IP address).
@@ -48,4 +50,8 @@ sim {
 jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
+}
+
+test {
+    useJUnitPlatform()
 }
