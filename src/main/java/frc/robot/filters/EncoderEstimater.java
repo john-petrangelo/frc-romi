@@ -1,4 +1,4 @@
-package frc.robot.sensors;
+package frc.robot.filters;
 
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;

@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.sensors.EncoderEstimater;
+import frc.robot.filters.EncoderEstimater;
 import frc.robot.speedcontrollers.FeedforwardSpeedController;
 
 public class RomiDrivetrain extends SubsystemBase {
