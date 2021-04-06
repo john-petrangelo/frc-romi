@@ -122,19 +122,13 @@ public class TrashCompactor {
     public void reset() {
         encoder.reset();
         estDistance = 0;
+        estRate = 0;
     }
 
     /**
-     * Returns the encoder distance as reported directly by the wrapped Encoder.
+     * Returns the wrapped Encoder.
      */
-    public double getEncoderDistance() {
-        return encoder.getDistance();
-    }
-
-    /**
-     * Returns the encoder rate as reported directly by the wrapped Encoder.
-     */
-    public double getEncoderRate() {
-        return encoder.getRate();
+    public Encoder getEncoder() {
+        return encoder;
     }
 }
