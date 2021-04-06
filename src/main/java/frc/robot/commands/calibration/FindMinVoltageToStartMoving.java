@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.RomiDrivetrain;
 
-public class FindMinVoltage extends CommandBase {
+public class FindMinVoltageToStartMoving extends CommandBase {
     public enum Side {
         LEFT_FWD, LEFT_BACK, RIGHT_FWD, RIGHT_BACK
     };
@@ -16,6 +16,7 @@ public class FindMinVoltage extends CommandBase {
     private static final double STEP_SIZE_VOLTS = 0.05;
 
     private RomiDrivetrain drivetrain;
+    private long initTime;
     private long stepStartTime;
     private double currentStepVoltage;
 
@@ -28,7 +29,7 @@ public class FindMinVoltage extends CommandBase {
      * Starts with very low voltage and slow ramp up until
      * motion is detected. Once motion is detected, stop and report the voltage.
      */
-    public FindMinVoltage(Side side, RomiDrivetrain drivetrain) {
+    public FindMinVoltageToStartMoving(Side side, RomiDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
         addRequirements(drivetrain);
 
@@ -57,7 +58,8 @@ public class FindMinVoltage extends CommandBase {
     @Override
     public void initialize() {
         super.initialize();
-        stepStartTime = System.currentTimeMillis();
+        initTime = System.currentTimeMillis();
+        stepStartTime = initTime;
         currentStepVoltage = 0.0;
 
         drivetrain.resetEncoders();
@@ -66,7 +68,7 @@ public class FindMinVoltage extends CommandBase {
     @Override
     public void execute() {
         // If it's too soon, don't bother checking.
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
 
         // Have we tried this voltage long enough?
         if (now >= stepStartTime + STEP_DURATION_MS) {
@@ -74,7 +76,7 @@ public class FindMinVoltage extends CommandBase {
             currentStepVoltage += STEP_SIZE_VOLTS;
 
             System.out.printf("%3d %s Stepping voltage V=%5.3f dist=%5.3f\n",
-                now % 1000, getName(), currentStepVoltage,
+                now - initTime, getName(), currentStepVoltage,
                 distance.get());
         }
 
@@ -93,6 +95,6 @@ public class FindMinVoltage extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return distance.get() > 0.0;
+        return distance.get() > 0.001;
     }
 }
