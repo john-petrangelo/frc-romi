@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.SlewRateLimiter;
 
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -23,16 +22,11 @@ public class RomiDrivetrain extends SubsystemBase {
   private final Spark leftMotor = new Spark(0);
   private final Spark rightMotor = new Spark(1);
 
-  // The Romi has onboard encoders that are hardcoded
-  // to use DIO pins 4/5 and 6/7 for the left and right
-  private final Encoder leftEncoder = new Encoder(4, 5);
-  private final Encoder rightEncoder = new Encoder(6, 7);
-  private final TrashCompactor leftEncocerFilter = new TrashCompactor(leftEncoder);
+  // The left and right wheel sensors.
+  private final TrashCompactor leftWheelSensor;
+  private final TrashCompactor rightWheelSensor;
 
   // Limit the amount of change allowed per iteration for each sensor.
-  private SlewRateLimiter leftDriveSpeed = new SlewRateLimiter(100);
-  private SlewRateLimiter rightDriveSpeed = new SlewRateLimiter(100);
-
   private final FeedforwardSpeedController leftFFController;
   private final FeedforwardSpeedController rightFFController;
 
@@ -95,9 +89,13 @@ public class RomiDrivetrain extends SubsystemBase {
    */
   public RomiDrivetrain() {
     super();
-    
-    leftEncoder.setDistancePerPulse(INCHES_PER_TICK);
-    rightEncoder.setDistancePerPulse(INCHES_PER_TICK);
+
+    // The Romi has onboard encoders that are hardcoded
+    // to use DIO pins 4/5 and 6/7 for the left and right
+    leftWheelSensor = new TrashCompactor(new Encoder(4, 5));
+    leftWheelSensor.getEncoder().setDistancePerPulse(INCHES_PER_TICK);
+    rightWheelSensor = new TrashCompactor(new Encoder(6, 7));
+    rightWheelSensor.getEncoder().setDistancePerPulse(INCHES_PER_TICK);
 
     // Create the speed controllers used for the various test modes.
     leftFFController = new FeedforwardSpeedController("L", leftMotor,
@@ -139,46 +137,42 @@ public class RomiDrivetrain extends SubsystemBase {
   }
 
   public void resetEncoders() {
-    leftEncoder.reset();
-    rightEncoder.reset();
+    leftWheelSensor.reset();
+    rightWheelSensor.reset();
   }
 
   public double getLeftDistanceInches() {
-    return leftEncoder.getDistance();
-  }
-
-  public double getLeftEstDistanceInches() {
-    return leftEncocerFilter.getDistance();
+    return leftWheelSensor.getDistance();
   }
 
   public double getRightDistanceInches() {
-    return rightEncoder.getDistance();
+    return rightWheelSensor.getDistance();
   }
 
   public double getMinDistanceInches() {
-    return Math.min(leftEncoder.getDistance(), rightEncoder.getDistance());
+    return Math.min(leftWheelSensor.getDistance(), rightWheelSensor.getDistance());
   }
 
   public double getMaxDistanceInches() {
-    return Math.max(leftEncoder.getDistance(), rightEncoder.getDistance());
+    return Math.max(leftWheelSensor.getDistance(), rightWheelSensor.getDistance());
   }
 
   public double getAvgDistanceInches() {
-    return (leftEncoder.getDistance() + rightEncoder.getDistance() / 2);
+    return (leftWheelSensor.getDistance() + rightWheelSensor.getDistance() / 2);
   }
 
   /**
    * Returns the left motor rate in inches per second.
    */
   public double getLeftRate() {
-    return leftEncoder.getRate();
+    return leftWheelSensor.getRate();
   }
 
   /**
    * Returns the right motor rate in inches per second.
    */
   public double getRightRate() {
-    return rightEncoder.getRate();
+    return rightWheelSensor.getRate();
   }
 
   @Override
@@ -188,15 +182,13 @@ public class RomiDrivetrain extends SubsystemBase {
     builder.addDoubleProperty(".leftSpeed", () -> getLeftRate(), null);
     builder.addDoubleProperty(".rightSpeed", () -> getRightRate(), null);
 
-    builder.addDoubleProperty(".leftSpeedSmoothed", () -> leftDriveSpeed.calculate(getLeftRate()), null);
-    builder.addDoubleProperty(".rightSpeedSmoothed", () -> rightDriveSpeed.calculate(getRightRate()), null);
-
     builder.addDoubleProperty(".leftDistance", () -> getLeftDistanceInches(), null);
     builder.addDoubleProperty(".rightDistance", () -> getRightDistanceInches(), null);
   }
 
   @Override
   public void periodic() {
-   leftEncocerFilter.update();
+    leftWheelSensor.update();
+    rightWheelSensor.update();
   }
 }
