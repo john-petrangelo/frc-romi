@@ -52,7 +52,7 @@ public class FindMinVoltageToStartMoving extends CommandBase {
             break;
         }
 
-        setName(String.format("%s(%s)", getName(), side.toString()));
+        setName(String.format("%s(%s)", "MinVoltsToStartMoving", side.toString()));
     }
 
     @Override

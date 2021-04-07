@@ -76,8 +76,9 @@ public class RobotContainer {
       new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.LEFT_FWD, drivetrain),
       new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.LEFT_BACK, drivetrain),
       new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.RIGHT_FWD, drivetrain),
-      new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.RIGHT_BACK, drivetrain))
-    );
+      new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.RIGHT_BACK, drivetrain),
+      new CalibrationLogger()
+    ));
     buttonB.whenPressed(new SequentialCommandGroup(
       new FindFFkS(FindFFkS.Side.LEFT_FWD, drivetrain))
       // new FindMinVoltage(FindMinVoltage.Side.LEFT_BACK, drivetrain),
