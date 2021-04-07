@@ -4,11 +4,11 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.calibration.*;
 import frc.robot.commands.drive.*;
 import frc.robot.commands.WriteMessage;
-import frc.robot.commands.Pause;
 import frc.robot.sensors.RomiGyro;
 import frc.robot.GrayBlueController.Axes;
 import frc.robot.GrayBlueController.Buttons;
@@ -89,7 +89,7 @@ public class RobotContainer {
       new DriveDistance(12, drivetrain),
       new DriveStop(drivetrain),
       new CalibrateDrive(drivetrain),
-      new Pause(0.3),
+      new WaitCommand(0.3),
       new WriteMessage("Settled for 300ms"),
       new CalibrateDrive(drivetrain),
       new WriteMessage("Calibration sequence complete"))
