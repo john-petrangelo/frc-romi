@@ -63,8 +63,8 @@ public class TrashCompactor {
 
         update(now, encoderDistance, encoderRate);
 
-        SmartDashboard.putNumber("EncoderEstimater/distance", estDistance);
-        SmartDashboard.putNumber("EncoderEstimater/rate", estRate);
+        SmartDashboard.putNumber("TrashCompactor/distance", estDistance);
+        SmartDashboard.putNumber("TrashCompactor/rate", estRate);
     }
 
     /**
