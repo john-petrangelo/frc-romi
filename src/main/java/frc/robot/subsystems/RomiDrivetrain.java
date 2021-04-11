@@ -77,12 +77,19 @@ public class RomiDrivetrain extends SubsystemBase {
   }
   
   private final static Characteristics myData = new Characteristics(
-      0.4687, 0.2381,
-      0.2993, 0.2685,
-      0.5561, 0.2666,
-      0.7771, 0.2545);
-      
-  private Characteristics data = myData;
+      0.4687, 0.2381,  // LF
+      0.2993, 0.2685,  // LB
+      0.5561, 0.2666,  // RF
+      0.7771, 0.2545); // RB
+
+  // Self-generated feed forward parameters for Romi wth block of wood on the roof.
+  private final static Characteristics heavyData = new Characteristics(
+    0.466, 0.256,  // LF
+    0.842, 0.259,  // LB
+    0.739, 0.276,  // RF
+    0.945, 0.260); // RB
+    
+  private Characteristics data = heavyData;
 
   /**
    * Creates a new RomiDrivetrain.
