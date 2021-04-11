@@ -25,6 +25,7 @@ public class DriveVoltsGetRate extends CommandBase {
     @Override
     public void initialize() {
         super.initialize();
+        System.out.printf("%s Driving at %5.3f volts\n", getName(), volts);
 
         drivetrain.resetEncoders();
     }
@@ -45,7 +46,7 @@ public class DriveVoltsGetRate extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
-        System.out.printf("%s end \n", getName());
+        System.out.printf("%s Done driving at %5.3f volts\n", getName(), volts);
 
         drivetrain.arcadeDrive(0.0, 0.0);
     }
