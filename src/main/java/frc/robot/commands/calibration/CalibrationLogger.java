@@ -13,11 +13,15 @@ public class CalibrationLogger extends CommandBase {
     private final String SLOW_VOLTS_S;
     private final String FAST_VOLTS_S;
 
-
     double lf_start_volts;
     double lb_start_volts;
     double rf_start_volts;
     double rb_start_volts;
+
+    double lf_stop_volts;
+    double lb_stop_volts;
+    double rf_stop_volts;
+    double rb_stop_volts;
 
     double lf_rate_slow;
     double lb_rate_slow;
@@ -45,7 +49,8 @@ public class CalibrationLogger extends CommandBase {
 
     private void logAll() {
         gatherData();
-        logMinVoltsToBeginMoving();
+        logMinVoltsToStartMoving();
+        logMinVoltsToStopMoving();
         logRatesForVoltages();
         logFeedForwardConstants();
     }
@@ -55,6 +60,11 @@ public class CalibrationLogger extends CommandBase {
         lb_start_volts = SmartDashboard.getNumber("Calibration/MinVoltsToStartMoving(LEFT_BACK)", -1.0);
         rf_start_volts = SmartDashboard.getNumber("Calibration/MinVoltsToStartMoving(RIGHT_FWD)", -1.0);
         rb_start_volts = SmartDashboard.getNumber("Calibration/MinVoltsToStartMoving(RIGHT_BACK)", -1.0);
+
+        lf_stop_volts = SmartDashboard.getNumber("Calibration/MinVoltsToStopMoving(FORWARD)(LEFT)", -1.0);
+        lb_stop_volts = SmartDashboard.getNumber("Calibration/MinVoltsToStopMoving(BACKWARD)(LEFT)", -1.0);
+        rf_stop_volts = SmartDashboard.getNumber("Calibration/MinVoltsToStopMoving(FORWARD)(RIGHT)", -1.0);
+        rb_stop_volts = SmartDashboard.getNumber("Calibration/MinVoltsToStopMoving(BACKWARD)(RIGHT)", -1.0);
 
         lf_rate_slow = SmartDashboard.getNumber("Calibration/LeftRateForVolts("  + SLOW_VOLTS_S +")", -1.0);
         lb_rate_slow = SmartDashboard.getNumber("Calibration/LeftRateForVolts(-" + SLOW_VOLTS_S +")", -1.0);
@@ -67,11 +77,19 @@ public class CalibrationLogger extends CommandBase {
         rb_rate_fast = SmartDashboard.getNumber("Calibration/RightRateForVolts(-" + FAST_VOLTS_S +")", -1.0);
     }
 
-    private void logMinVoltsToBeginMoving() {
+    private void logMinVoltsToStartMoving() {
         System.out.printf("---------------------------------------------\n");
-        System.out.printf("MINIMUM VOLTAGE REQUIRED TO BEGIN MOVING\n");
+        System.out.printf("MINIMUM VOLTAGE REQUIRED TO START MOVING\n");
         System.out.printf("Left Forward:  %5.3f    Right Forward:  %5.3f\n", lf_start_volts, rf_start_volts);
         System.out.printf("Left Backward: %5.3f    Right Backward: %5.3f\n", lb_start_volts, rb_start_volts);
+        System.out.printf("---------------------------------------------\n");
+    }
+
+    private void logMinVoltsToStopMoving() {
+        System.out.printf("---------------------------------------------\n");
+        System.out.printf("MINIMUM VOLTAGE REQUIRED TO STOP MOVING\n");
+        System.out.printf("Left Forward:  %5.3f    Right Forward:  %5.3f\n", lf_stop_volts, rf_stop_volts);
+        System.out.printf("Left Backward: %5.3f    Right Backward: %5.3f\n", lb_stop_volts, rb_stop_volts);
         System.out.printf("---------------------------------------------\n");
     }
 

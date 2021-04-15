@@ -72,31 +72,7 @@ public class RobotContainer {
 
     buttonBack.whenPressed(()  -> gyro.reset());
 
-    final double SLOW_VOLTS = 2.0;
-    final double FAST_VOLTS = 6.0;
-    buttonX.whenPressed(new SequentialCommandGroup(
-      new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.LEFT_FWD, drivetrain),
-      new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.LEFT_BACK, drivetrain),
-      new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.RIGHT_FWD, drivetrain),
-      new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.RIGHT_BACK, drivetrain),
-
-      new DriveVoltsGetRate(SLOW_VOLTS, drivetrain).raceWith(new WaitCommand(2.0)),
-      new DriveVoltsGetRate(FAST_VOLTS, drivetrain).raceWith(new WaitCommand(2.0)),
-
-      new ArcadeDrive(drivetrain, () -> 0.0, () -> 0.0).raceWith(new WaitCommand(0.25)),
-
-      new DriveVoltsGetRate(-SLOW_VOLTS, drivetrain).raceWith(new WaitCommand(2.0)),
-      new DriveVoltsGetRate(-FAST_VOLTS, drivetrain).raceWith(new WaitCommand(2.0)),
-
-      new CalibrationLogger(SLOW_VOLTS, FAST_VOLTS)
-    ));
-
-    buttonB.whenPressed(new SequentialCommandGroup(
-      new FindFFkS(FindFFkS.Side.LEFT_FWD, drivetrain))
-      // new FindMinVoltage(FindMinVoltage.Side.LEFT_BACK, drivetrain),
-      // new FindMinVoltage(FindMinVoltage.Side.RIGHT_FWD, drivetrain),
-      // new FindMinVoltage(FindMinVoltage.Side.RIGHT_BACK, drivetrain))
-    );
+    buttonX.whenPressed(getCalibrationCommandSequence());
 
     buttonY.whenPressed(new SequentialCommandGroup(
       new WriteMessage("Starting calibration sequence, will drive 12 inches then analyze the results"),
@@ -107,6 +83,34 @@ public class RobotContainer {
       new WriteMessage("Settled for 300ms"),
       new CalibrateDrive(drivetrain),
       new WriteMessage("Calibration sequence complete"))
+    );
+  }
+
+  private Command getCalibrationCommandSequence() {
+    final double SLOW_VOLTS = 2.0;
+    final double FAST_VOLTS = 6.0;
+
+    return new SequentialCommandGroup(
+      new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.LEFT_FWD, drivetrain),
+      new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.LEFT_BACK, drivetrain),
+      new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.RIGHT_FWD, drivetrain),
+      new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.RIGHT_BACK, drivetrain),
+
+      new ArcadeDrive(drivetrain, () -> 0.3, () -> 0.0).raceWith(new WaitCommand(0.5)),
+      new FindMinVoltageToStopMoving(FindMinVoltageToStopMoving.Direction.FORWARD, drivetrain),
+
+      new ArcadeDrive(drivetrain, () -> -0.3, () -> 0.0).raceWith(new WaitCommand(0.5)),
+      new FindMinVoltageToStopMoving(FindMinVoltageToStopMoving.Direction.BACKWARD, drivetrain),
+
+      new DriveVoltsGetRate(SLOW_VOLTS, drivetrain).raceWith(new WaitCommand(2.0)),
+      new DriveVoltsGetRate(FAST_VOLTS, drivetrain).raceWith(new WaitCommand(2.0)),
+
+      new ArcadeDrive(drivetrain, () -> 0.0, () -> 0.0).raceWith(new WaitCommand(1.0)),
+
+      new DriveVoltsGetRate(-SLOW_VOLTS, drivetrain).raceWith(new WaitCommand(2.0)),
+      new DriveVoltsGetRate(-FAST_VOLTS, drivetrain).raceWith(new WaitCommand(2.0)),
+
+      new CalibrationLogger(SLOW_VOLTS, FAST_VOLTS)
     );
   }
 
