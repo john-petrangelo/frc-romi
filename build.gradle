@@ -35,6 +35,9 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+
+    // My other dependencies
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 }
 
 // Set the websocket remote host (the Romi IP address).
