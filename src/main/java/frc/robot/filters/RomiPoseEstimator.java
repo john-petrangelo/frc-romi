@@ -29,7 +29,10 @@ public class RomiPoseEstimator {
      */
     public RomiPoseEstimator() {
         // The error standard deviations used to create the process covariance matrix.
-        Matrix<N3, N1> stateStdDevs = VecBuilder.fill(0.1, 0.1, 0.018*5);
+        Matrix<N3, N1> stateStdDevs = VecBuilder.fill(
+            Math.sqrt(0.10),
+            Math.sqrt(0.10),
+            Math.sqrt(0.09));
 
         // The error standard deviations used to create the measurement covariance matrix.
         Matrix<N2, N1> measurementStdDevs = VecBuilder.fill(0.14, 0.14);
