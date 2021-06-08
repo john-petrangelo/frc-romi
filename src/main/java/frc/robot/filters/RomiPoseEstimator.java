@@ -35,7 +35,9 @@ public class RomiPoseEstimator {
             Math.sqrt(0.09));
 
         // The error standard deviations used to create the measurement covariance matrix.
-        Matrix<N2, N1> measurementStdDevs = VecBuilder.fill(0.14, 0.14);
+        Matrix<N2, N1> measurementStdDevs = VecBuilder.fill(
+            Math.sqrt(0.14),
+            Math.sqrt(0.14));
 
         ukf = new UnscentedKalmanFilter<>(
             Nat.N3(),           /* number of states */
