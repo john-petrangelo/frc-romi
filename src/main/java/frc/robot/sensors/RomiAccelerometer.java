@@ -47,7 +47,7 @@ public class RomiAccelerometer extends SubsystemBase {
   }
 
   /**
-   * Get the current acceleration along the x axis in inches/sec^2.
+   * Get the current acceleration along the y axis in inches/sec^2.
    */
   public double getY() {
     if (accel != null) {
@@ -58,10 +58,11 @@ public class RomiAccelerometer extends SubsystemBase {
   }
 
   /**
-   * Get the current acceleration along the x axis in inches/sec^2.
+   * Get the current acceleration along the z axis in inches/sec^2.
    */
   public double getZ() {
     if (accel != null) {
+      // TODO
       // Note: we subtract 1g to compensate for gravity. However, this assumes that
       // we are exactly upright and gravity is entirely along the z-axis. More refinement
       // is necessary before this is useful.
