@@ -7,6 +7,7 @@ import edu.wpi.first.wpiutil.math.VecBuilder;
 import edu.wpi.first.wpiutil.math.numbers.N1;
 import edu.wpi.first.wpiutil.math.numbers.N2;
 import edu.wpi.first.wpiutil.math.numbers.N3;
+import frc.robot.RomiMap;
 
 /**
  * RomiPoseEstimator tracks the location and heading of a Romi robot.
@@ -52,7 +53,9 @@ public class RomiPoseEstimator {
     /**
      * State transition function. Performs the derivative of the state vector.
      * 
-     * @returns change in state.
+     * In other words, given a state and a set of inputs, how do we expect the state to change?
+     * 
+     * @returns change in state
      */
     private Matrix<N3, N1> f(Matrix<N3,N1> states, Matrix<N2,N1> inputs) {
         States x = new States(states);
@@ -78,9 +81,6 @@ public class RomiPoseEstimator {
     private Matrix<N2,N1> h(Matrix<N3,N1> states, Matrix<N2,N1> inputs) {
         System.out.println("Called h");
 
-        // Width, distance between the wheels of the robot. Should get this from a RobotMap class.
-        final double width = 2.75;
-
         // Since we are not tracking rates in the state, the state has no contribution.
         // States x = new States(states);
 
@@ -88,7 +88,7 @@ public class RomiPoseEstimator {
         Inputs u = new Inputs(inputs);
 
         // The offset is used to find the inner and outer wheel turn radii.
-        double offset = width / (2 * u.getRadius());
+        double offset = RomiMap.turnTrackWidthInches / (2 * u.getRadius());
 
         Outputs outputs = new Outputs(
             (1 - offset) * u.getLinearRate(),
