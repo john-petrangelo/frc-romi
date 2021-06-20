@@ -2,10 +2,10 @@ package frc.robot.filters;
 
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.subsystems.RomiDrivetrain;
+import frc.robot.RomiMap;
 
 public class TrashCompactor {
-    private final double MAX_SPEED = RomiDrivetrain.MAX_SPEED * 1.1;
+    private final double MAX_SPEED = RomiMap.MAX_SPEED * 1.1;
 
     private final Encoder encoder;
 

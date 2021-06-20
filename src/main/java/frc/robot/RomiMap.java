@@ -27,4 +27,46 @@ public final class RomiMap {
      * friction, wheel thickness, etc.
      */
     public final static double turnTrackWidthInches = 6.01;
+
+    /**
+     * The number of ticks per revolution for the Romi wheel sensors.
+     */
+    public static final double COUNTS_PER_REVOLUTION = 1440.0;
+
+    /**
+     * The diameter of the Romi wheels.
+     */
+	public static final double WHEEL_DIAMETER_INCHES = 2.75;
+
+    /**
+     * The number of inches travelled per tick of the Romi wheel sensors.
+     */
+	public static final double INCHES_PER_TICK = Math.PI * WHEEL_DIAMETER_INCHES / COUNTS_PER_REVOLUTION;
+
+    /**
+     * The maximum speed of the Romi wheels in inches per second.
+     */
+    public static final double MAX_SPEED = 20.0;
+
+    /**
+     * The maximum turn rate of the Romi in degrees per second
+     * <br><br>
+     * Note: this was collected emperically, based on setting max speed to 20 in/sec.
+     */
+    public static final double MAX_TURN_RATE = 410.0;
+    
+    /**
+     * The PWM ID for the Romi left wheel motor.
+     */
+    public static final int LEFT_WHEEL_MOTOR_ID = 0;
+
+    /**
+     * The PWM ID for the Romi right wheel motor.
+     */
+    public static final int RIGHT_WHEEL_MOTOR_ID = 1;
+
+    /**
+     * The deadband to apply to joystick control inputs. Changes within the deadband are ignored.
+     */
+    public static final double CONTROLS_DEADBAND = 0.12;
 }

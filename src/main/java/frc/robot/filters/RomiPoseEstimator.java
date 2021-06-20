@@ -50,56 +50,13 @@ public class RomiPoseEstimator {
             0.020               /* nominalDtSeconds */);
     }
 
-    /**
-     * State transition function. Performs the derivative of the state vector.
-     * 
-     * In other words, given a state and a set of inputs, how do we expect the state to change?
-     * 
-     * @returns change in state
-     */
-    private Matrix<N3, N1> f(Matrix<N3,N1> states, Matrix<N2,N1> inputs) {
-        States x = new States(states);
-        Inputs u = new Inputs(inputs);
-
-        // Calculate the change in state.
-        double thetaRad = Math.toRadians(x.getTheta());
-        States dState = new States(
-            u.getLinearRate() * Math.sin(thetaRad),
-            u.getLinearRate() * Math.cos(thetaRad),
-            u.getTurnRate());
-
-        return dState.getMatrix();
-    };
-
-    /**
-     * Measurement function, maps the current state and inputs into measurement space.
-     * The result of this function can be compared directly  to the actual measurements
-     * provided by the sensors.
-     * 
-     * @return state and inputs mapped to measurement space
-     */
-    private Matrix<N2,N1> h(Matrix<N3,N1> states, Matrix<N2,N1> inputs) {
-        System.out.println("Called h");
-
-        // Since we are not tracking rates in the state, the state has no contribution.
-        // States x = new States(states);
-
-        // Inputs 
-        Inputs u = new Inputs(inputs);
-
-        // The offset is used to find the inner and outer wheel turn radii.
-        double offset = RomiMap.turnTrackWidthInches / (2 * u.getRadius());
-
-        Outputs outputs = new Outputs(
-            (1 - offset) * u.getLinearRate(),
-            (1 + offset) * u.getLinearRate()
-        );
-        return outputs.getMatrix();
-    };
-
-    /**
-     * Predict step
-     */
+     /**
+      * Update the state prediction given current controls and time passed
+      *
+      * @param linearRate
+      * @param turnRate
+      * @param dt
+      */
     public void predict(double linearRate, double turnRate, double dt) {
         Matrix<N2, N1> u = VecBuilder.fill(linearRate, turnRate);
         ukf.predict(u, dt);
@@ -110,7 +67,7 @@ public class RomiPoseEstimator {
      * current control inputs and the measured outputs from the sensors.
      */
     public void update(
-        // Inputs
+        // Inputs (controls)
         double linearRate, double turnRate,
         // Outputs (measurements)
         double leftEncoderRate, double rightEncoderRate)
@@ -191,4 +148,49 @@ public class RomiPoseEstimator {
             getVarX(), getVarY(), getVarHeading());
         return result;
     }
+
+    /**
+     * State transition function. Performs the derivative of the state vector.
+     * 
+     * In other words, given a state and a set of inputs, how do we expect the state to change?
+     * 
+     * @returns change in state
+     */
+    private Matrix<N3, N1> f(Matrix<N3,N1> states, Matrix<N2,N1> inputs) {
+        States x = new States(states);
+        Inputs u = new Inputs(inputs);
+
+        // Calculate the change in state.
+        double thetaRad = Math.toRadians(x.getTheta());
+        States dState = new States(
+            u.getLinearRate() * Math.sin(thetaRad),
+            u.getLinearRate() * Math.cos(thetaRad),
+            u.getTurnRate());
+
+        return dState.getMatrix();
+    };
+
+    /**
+     * Measurement function, maps the current state and inputs into measurement space.
+     * The result of this function can be compared directly  to the actual measurements
+     * provided by the sensors.
+     * 
+     * @return state and inputs mapped to measurement space
+     */
+    private Matrix<N2,N1> h(Matrix<N3,N1> states, Matrix<N2,N1> inputs) {
+        // Since we are not tracking rates in the state, the state has no contribution.
+        // States x = new States(states);
+
+        // Inputs 
+        Inputs u = new Inputs(inputs);
+
+        // The offset is used to find the inner and outer wheel turn radii.
+        double offset = RomiMap.turnTrackWidthInches / (2 * u.getRadius());
+
+        Outputs outputs = new Outputs(
+            (1 - offset) * u.getLinearRate(),
+            (1 + offset) * u.getLinearRate()
+        );
+        return outputs.getMatrix();
+    };
 }

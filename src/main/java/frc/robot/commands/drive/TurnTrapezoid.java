@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand;
+import frc.robot.RomiMap;
 import frc.robot.sensors.RomiGyro;
 import frc.robot.subsystems.RomiDrivetrain;
 
@@ -23,7 +24,7 @@ public class TurnTrapezoid extends ProfiledPIDCommand {
             new ProfiledPIDController(kP, kI, kD, CONSTRAINTS),
             () -> -gyro.getAngleYaw(),
             angle,
-            (output, setpoint) -> drivetrain.arcadeDrive(0.0, output / RomiDrivetrain.MAX_SPEED),
+            (output, setpoint) -> drivetrain.arcadeDrive(0.0, output / RomiMap.MAX_SPEED),
             drivetrain, gyro);
 
         this.gyro = gyro;
