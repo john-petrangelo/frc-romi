@@ -228,8 +228,22 @@ public class RomiDrivetrain extends SubsystemBase {
     SmartDashboard.putNumber("tc/rate(left)", getLeftRate());
     SmartDashboard.putNumber("tc/rate(right)", getRightRate());
 
+    // X position ± 1 stdev
+    final double stdX = Math.sqrt(pose.getVarX());
     SmartDashboard.putNumber("pose/X", pose.getEstX());
+    SmartDashboard.putNumber("pose/lowerX", pose.getEstX() - stdX);
+    SmartDashboard.putNumber("pose/upperX", pose.getEstX() + stdX);
+
+    // Y position ± 1 stdev
+    final double stdY = Math.sqrt(pose.getVarY());
     SmartDashboard.putNumber("pose/Y", pose.getEstY());
+    SmartDashboard.putNumber("pose/lowerY", pose.getEstY() - stdY);
+    SmartDashboard.putNumber("pose/upperY", pose.getEstY() + stdY);
+
+    // Heading ± 1 stdev
+    final double stdHeading = Math.sqrt(pose.getVarHeading());
     SmartDashboard.putNumber("pose/heading", pose.getEstHeading());
+    SmartDashboard.putNumber("pose/lowerHeading", pose.getEstHeading() - stdHeading);
+    SmartDashboard.putNumber("pose/upperHeading", pose.getEstHeading() + stdHeading);
   }
 }
