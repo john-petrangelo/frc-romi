@@ -5,19 +5,19 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package frc.robot.commands.drive;
+package frc.robot.commands;
 
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.RomiDrivetrain;
 
-public class ArcadeDrive extends CommandBase {
+public class ArcadeDriveCmd extends CommandBase {
     private RomiDrivetrain drivetrain;
     private Supplier<Double> speedSupplier;
     private Supplier<Double> rotateSupplier;
 
-    public ArcadeDrive(RomiDrivetrain drivetrain, Supplier<Double> speedSupplier, Supplier<Double> rotateSupplier) {
+    public ArcadeDriveCmd(RomiDrivetrain drivetrain, Supplier<Double> speedSupplier, Supplier<Double> rotateSupplier) {
         this.drivetrain = drivetrain;
         this.speedSupplier = speedSupplier;
         this.rotateSupplier = rotateSupplier;

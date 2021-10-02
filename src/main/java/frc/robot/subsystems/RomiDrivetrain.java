@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpiutil.math.MathUtil;
 import frc.robot.RomiMap;
-import frc.robot.filters.RomiPoseEstimator;
 import frc.robot.filters.TrashCompactor;
 import frc.robot.sensors.RomiGyro;
 import frc.robot.speedcontrollers.FeedforwardSpeedController;
@@ -22,10 +21,6 @@ public class RomiDrivetrain extends SubsystemBase {
   // The left and right wheel sensors.
   private final TrashCompactor leftWheelSensor;
   private final TrashCompactor rightWheelSensor;
-
-  // Use the RomiPoseEstimator to keep track of our current state estimates.
-  private final RomiPoseEstimator pose = new RomiPoseEstimator();
-  private long lastPoseUpdate = System.currentTimeMillis();
 
   // Limit the amount of change allowed per iteration for each sensor.
   private final FeedforwardSpeedController leftFFController;
@@ -87,15 +82,6 @@ public class RomiDrivetrain extends SubsystemBase {
 
     // Tell the motors what we want them to do.
     diffDrive.arcadeDrive(speed, rotation, false);
-
-    // How long since the last update to the pose estimate?
-    final long timeNow = System.currentTimeMillis();
-    final double dt = (timeNow - lastPoseUpdate) / 1000.0;
-    lastPoseUpdate = timeNow;
-
-    // Update the pose estimate.
-    arcadeDrivePredictPose(speed, rotation, dt);
-    arcadeDriveUpdatePose(speed, rotation, getLeftRate(), getRightRate());
   }
 
   /**
@@ -121,41 +107,6 @@ public class RomiDrivetrain extends SubsystemBase {
     } else {
       return 0.0;
     }
-  }
-
-  /**
-   * Predict new pose using arcade drive inputs.
-   * 
-   * @param speed The robot's speed along the X axis [-1.0..1.0]. Forward is positive.
-   * @param rotation The robot's rotation rate [-1.0..1.0]. Clockwise is positive.
-   * @param dt The amount of time since the last prediction or update.
-   */
-  private void arcadeDrivePredictPose(double speed, double rotation, double dt) {
-    // Clamp and scale the speed and rotation inputs exactly the way the WPILib
-    // DifferentialDrive and RobotDriveBase classes do.
-    speed = conditionControlInput(speed);
-    rotation = conditionControlInput(rotation);
-
-    double linearRate = speed * RomiMap.MAX_SPEED;
-    double turnRate = rotation * RomiMap.MAX_TURN_RATE;
-
-    pose.predict(linearRate, turnRate, dt);
-  }
-
-  /**
-   * Update the pose using arcade drive inputs and sensor measurements.
-   * 
-   * @param speed The robot's speed along the X axis [-1.0..1.0]. Forward is positive.
-   * @param rotation The robot's rotation rate [-1.0..1.0]. Clockwise is positive.
-   * @param leftRate The measured rate of the left wheel in inches per second.
-   * @param rightRate The measure rate of the right wheel in inches per second.
-   */
-  private void arcadeDriveUpdatePose(double speed, double rotation, double leftRate, double rightRate) {
-    double linearRate = speed * RomiMap.MAX_SPEED;
-    double turnRate = rotation * RomiMap.MAX_TURN_RATE;
-
-    System.out.printf("arcadeDriveUpdatePose %f %f %f %f\n", linearRate, turnRate, leftRate, rightRate);
-    pose.update(linearRate, turnRate, leftRate, rightRate, gyro.getRateYaw());
   }
 
   public void voltDriveLeft(double voltage) {
@@ -234,23 +185,5 @@ public class RomiDrivetrain extends SubsystemBase {
     SmartDashboard.putNumber("tc/distance(right)", getRightDistanceInches());
     SmartDashboard.putNumber("tc/rate(left)", getLeftRate());
     SmartDashboard.putNumber("tc/rate(right)", getRightRate());
-
-    // X position ± 1 stdev
-    final double stdX = Math.sqrt(pose.getVarX());
-    SmartDashboard.putNumber("pose/X", pose.getEstX());
-    SmartDashboard.putNumber("pose/lowerX", pose.getEstX() - stdX);
-    SmartDashboard.putNumber("pose/upperX", pose.getEstX() + stdX);
-
-    // Y position ± 1 stdev
-    final double stdY = Math.sqrt(pose.getVarY());
-    SmartDashboard.putNumber("pose/Y", pose.getEstY());
-    SmartDashboard.putNumber("pose/lowerY", pose.getEstY() - stdY);
-    SmartDashboard.putNumber("pose/upperY", pose.getEstY() + stdY);
-
-    // Heading ± 1 stdev
-    final double stdHeading = Math.sqrt(pose.getVarHeading());
-    SmartDashboard.putNumber("pose/heading", pose.getEstHeading());
-    SmartDashboard.putNumber("pose/lowerHeading", pose.getEstHeading() - stdHeading);
-    SmartDashboard.putNumber("pose/upperHeading", pose.getEstHeading() + stdHeading);
   }
 }

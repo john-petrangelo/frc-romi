@@ -1,20 +1,20 @@
-package frc.robot.commands.drive;
+package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.RomiDrivetrain;
 
-public class DriveDistance extends CommandBase {
+public class DriveDistanceCmd extends CommandBase {
     private static final double SPEED = 1.0;
 
     private RomiDrivetrain drivetrain;
     private double inches;
 
-    public DriveDistance(double inches, RomiDrivetrain drivetrain) {
+    public DriveDistanceCmd(double inches, RomiDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
         this.inches = inches;
 
         addRequirements(drivetrain);
-        setName("DriveDistance(" + inches + ")");
+        setName("DriveDistanceCmd(" + inches + ")");
     }
 
     // Called when the command is initially scheduled.

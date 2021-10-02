@@ -23,7 +23,7 @@ public class TrashCompactor {
      *
      * Algorithm: If the encoder distance changes and the rate is "reasonable"
      * then trust the measurement, otherwise trust the prediction. If 10 samples
-     * in a row have the same value then take it as a new value (in case we the
+     * in a row have the same value then take it as a new value (in case the
      * robot really is stopped).
      */
     public TrashCompactor(Encoder encoder) {

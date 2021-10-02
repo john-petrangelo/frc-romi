@@ -1,16 +1,16 @@
-package frc.robot.commands.drive;
+package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.sensors.RomiGyro;
 import frc.robot.subsystems.RomiDrivetrain;
 
-public class TurnWithGyro extends CommandBase {
+public class TurnDegreesCmd extends CommandBase {
     private RomiDrivetrain drivetrain;
     private RomiGyro gyro;
     private double degrees;
     private final double SPEED = 0.2;
 
-    public TurnWithGyro(double degrees, RomiDrivetrain drivetrain, RomiGyro gyro) {
+    public TurnDegreesCmd(double degrees, RomiDrivetrain drivetrain, RomiGyro gyro) {
         this.drivetrain = drivetrain;
         this.gyro = gyro;
         this.degrees = degrees;

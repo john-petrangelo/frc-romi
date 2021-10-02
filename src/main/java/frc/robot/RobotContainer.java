@@ -4,14 +4,13 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.calibration.*;
-import frc.robot.commands.drive.*;
-import frc.robot.commands.WriteMessage;
 import frc.robot.sensors.RomiGyro;
 import frc.robot.GrayBlueController.Axes;
 import frc.robot.GrayBlueController.Buttons;
+import frc.robot.commands.ArcadeDriveCmd;
+import frc.robot.commands.DriveDistanceCmd;
+import frc.robot.commands.TurnDegreesCmd;
 import frc.robot.subsystems.RomiDrivetrain;
 
 /**
@@ -41,7 +40,7 @@ public class RobotContainer {
 
   public RobotContainer() {
     // The default command is run when no other commands are active.
-    drivetrain.setDefaultCommand(new ArcadeDrive(drivetrain,
+    drivetrain.setDefaultCommand(new ArcadeDriveCmd(drivetrain,
         () -> -controller.getRawAxis(Axes.LeftY.value),
         () ->  controller.getRawAxis(Axes.RightX.value)
     ));
@@ -56,62 +55,21 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    povUp.whenPressed(new DriveDistance(36.0, drivetrain));
-    povDown.whenPressed(new DriveDistance(-36.0, drivetrain));
+    povUp.whenPressed(new DriveDistanceCmd(36.0, drivetrain));
+    povDown.whenPressed(new DriveDistanceCmd(-36.0, drivetrain));
     // povUp.whenPressed(new DriveForwardWithGyro(36.0, drivetrain, gyro));
     // povDown.whenPressed(new DriveForwardWithGyro(-36.0, drivetrain, gyro));
     // povUp.whenPressed(new DriveTrapezoid(36.0, drivetrain));
     // povDown.whenPressed(new DriveTrapezoid(-36.0, drivetrain));
 
-    povLeft.whenPressed(new TurnWithGyro(-73, drivetrain, gyro));
-    povRight.whenPressed(new TurnWithGyro(73, drivetrain, gyro));
+    povLeft.whenPressed(new TurnDegreesCmd(-73, drivetrain, gyro));
+    povRight.whenPressed(new TurnDegreesCmd(73, drivetrain, gyro));
     // povLeft.whenPressed(new TurnToAngleWithPID(-90, drivetrain, gyro));
     // povRight.whenPressed(new TurnToAngleWithPID(90, drivetrain, gyro));
     // povLeft.whenPressed(new TurnTrapezoid(-90.0, drivetrain, gyro));
     // povRight.whenPressed(new TurnTrapezoid(90.0, drivetrain, gyro));
 
     buttonBack.whenPressed(()  -> gyro.reset());
-
-    buttonX.whenPressed(getCalibrationCommandSequence());
-
-    buttonY.whenPressed(new SequentialCommandGroup(
-      new WriteMessage("Starting calibration sequence, will drive 12 inches then analyze the results"),
-      new DriveDistance(12, drivetrain),
-      new DriveStop(drivetrain),
-      new CalibrateDrive(drivetrain),
-      new WaitCommand(0.3),
-      new WriteMessage("Settled for 300ms"),
-      new CalibrateDrive(drivetrain),
-      new WriteMessage("Calibration sequence complete"))
-    );
-  }
-
-  private Command getCalibrationCommandSequence() {
-    final double SLOW_VOLTS = 2.0;
-    final double FAST_VOLTS = 6.0;
-
-    return new SequentialCommandGroup(
-      new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.LEFT_FWD, drivetrain),
-      new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.LEFT_BACK, drivetrain),
-      new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.RIGHT_FWD, drivetrain),
-      new FindMinVoltageToStartMoving(FindMinVoltageToStartMoving.Side.RIGHT_BACK, drivetrain),
-
-      new ArcadeDrive(drivetrain, () -> 0.3, () -> 0.0).raceWith(new WaitCommand(0.5)),
-      new FindMinVoltageToStopMoving(FindMinVoltageToStopMoving.Direction.FORWARD, drivetrain),
-
-      new ArcadeDrive(drivetrain, () -> -0.3, () -> 0.0).raceWith(new WaitCommand(0.5)),
-      new FindMinVoltageToStopMoving(FindMinVoltageToStopMoving.Direction.BACKWARD, drivetrain),
-
-      new DriveVoltsGetRate(SLOW_VOLTS, drivetrain).raceWith(new WaitCommand(2.0)),
-      new DriveVoltsGetRate(FAST_VOLTS, drivetrain).raceWith(new WaitCommand(2.0)),
-
-      new ArcadeDrive(drivetrain, () -> 0.0, () -> 0.0).raceWith(new WaitCommand(1.0)),
-
-      new DriveVoltsGetRate(-SLOW_VOLTS, drivetrain).raceWith(new WaitCommand(2.0)),
-      new DriveVoltsGetRate(-FAST_VOLTS, drivetrain).raceWith(new WaitCommand(2.0)),
-
-      new CalibrationLogger(SLOW_VOLTS, FAST_VOLTS)
-    );
   }
 
   /**
@@ -121,22 +79,22 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     Command cmds = new SequentialCommandGroup(
-      new DriveDistance(12, drivetrain),
-      new TurnWithGyro(90, drivetrain, gyro),
-      new DriveDistance(12, drivetrain),
-      new TurnWithGyro(-45, drivetrain, gyro),
-      new DriveDistance(12 * Math.sqrt(2), drivetrain),
-      new TurnWithGyro(45+90, drivetrain, gyro),
-      new DriveDistance(24, drivetrain),
-      new TurnWithGyro(90, drivetrain, gyro),
-      new DriveDistance(24, drivetrain),
-      new TurnWithGyro(90, drivetrain, gyro)
+      new DriveDistanceCmd(12, drivetrain),
+      new TurnDegreesCmd(90, drivetrain, gyro),
+      new DriveDistanceCmd(12, drivetrain),
+      new TurnDegreesCmd(-45, drivetrain, gyro),
+      new DriveDistanceCmd(12 * Math.sqrt(2), drivetrain),
+      new TurnDegreesCmd(45+90, drivetrain, gyro),
+      new DriveDistanceCmd(24, drivetrain),
+      new TurnDegreesCmd(90, drivetrain, gyro),
+      new DriveDistanceCmd(24, drivetrain),
+      new TurnDegreesCmd(90, drivetrain, gyro)
     );
 
     return cmds;
   }
 
   public Command getTestCommand() {
-    return new DriveDistance(12.0, drivetrain);
+    return new DriveDistanceCmd(12.0, drivetrain);
   }
 }

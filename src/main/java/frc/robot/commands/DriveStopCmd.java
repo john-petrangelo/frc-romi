@@ -1,12 +1,12 @@
-package frc.robot.commands.drive;
+package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.RomiDrivetrain;
 
-public class DriveStop extends CommandBase {
+public class DriveStopCmd extends CommandBase {
     private RomiDrivetrain drivetrain;
 
-    public DriveStop(RomiDrivetrain drivetrain) {
+    public DriveStopCmd(RomiDrivetrain drivetrain) {
         this.drivetrain = drivetrain;
 
         addRequirements(drivetrain);
