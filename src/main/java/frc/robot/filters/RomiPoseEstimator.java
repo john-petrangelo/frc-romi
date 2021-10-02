@@ -15,8 +15,8 @@ import frc.robot.RomiMap;
  * the state of the robot.
  */
 public class RomiPoseEstimator {
-    // 3 states, 2 inputs, 2 outputs
-    private final UnscentedKalmanFilter<N3, N2, N2> ukf;
+    // 3 states, 2 inputs, 3 outputs
+    private final UnscentedKalmanFilter<N3, N2, N3> ukf;
 
     /**
      * Kalman filter<p>
@@ -31,18 +31,22 @@ public class RomiPoseEstimator {
     public RomiPoseEstimator() {
         // The error standard deviations used to create the process covariance matrix.
         Matrix<N3, N1> stateStdDevs = VecBuilder.fill(
-            Math.sqrt(0.10),
-            Math.sqrt(0.10),
-            Math.sqrt(0.09));
+            Math.sqrt(0.1),
+            Math.sqrt(0.1),
+            Math.sqrt(10.0));
+            // Math.sqrt(0.10),
+            // Math.sqrt(0.10),
+            // Math.sqrt(0.09));
 
         // The error standard deviations used to create the measurement covariance matrix.
-        Matrix<N2, N1> measurementStdDevs = VecBuilder.fill(
+        Matrix<N3, N1> measurementStdDevs = VecBuilder.fill(
             Math.sqrt(0.14),
-            Math.sqrt(0.14));
+            Math.sqrt(0.14),
+            Math.sqrt(0.001));
 
         ukf = new UnscentedKalmanFilter<>(
             Nat.N3(),           /* number of states */
-            Nat.N2(),           /* number of outputs (sensors) */
+            Nat.N3(),           /* number of outputs (sensors) */
             this::f,            /* state transition function */
             this::h,            /* measurement function */
             stateStdDevs,       /* process covariance */
@@ -70,10 +74,11 @@ public class RomiPoseEstimator {
         // Inputs (controls)
         double linearRate, double turnRate,
         // Outputs (measurements)
-        double leftEncoderRate, double rightEncoderRate)
+        double leftEncoderRate, double rightEncoderRate,
+        double gyroTurnRate)
     {
         Matrix<N2, N1> u = VecBuilder.fill(linearRate, turnRate);
-        Matrix<N2, N1> z = VecBuilder.fill(leftEncoderRate, rightEncoderRate);
+        Matrix<N3, N1> z = VecBuilder.fill(leftEncoderRate, rightEncoderRate, gyroTurnRate);
 
         ukf.correct(u, z);
     }
@@ -177,7 +182,7 @@ public class RomiPoseEstimator {
      * 
      * @return state and inputs mapped to measurement space
      */
-    private Matrix<N2,N1> h(Matrix<N3,N1> states, Matrix<N2,N1> inputs) {
+    private Matrix<N3,N1> h(Matrix<N3,N1> states, Matrix<N2,N1> inputs) {
         // Since we are not tracking rates in the state, the state has no contribution.
         // States x = new States(states);
 
@@ -189,7 +194,8 @@ public class RomiPoseEstimator {
 
         Outputs outputs = new Outputs(
             (1 - offset) * u.getLinearRate(),
-            (1 + offset) * u.getLinearRate()
+            (1 + offset) * u.getLinearRate(),
+            u.getTurnRate()
         );
         return outputs.getMatrix();
     };

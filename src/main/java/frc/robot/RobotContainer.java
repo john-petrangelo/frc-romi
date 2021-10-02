@@ -22,8 +22,8 @@ import frc.robot.subsystems.RomiDrivetrain;
  * commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  private final RomiDrivetrain drivetrain = new RomiDrivetrain();
   private final RomiGyro gyro = new RomiGyro();
+  private final RomiDrivetrain drivetrain = new RomiDrivetrain(gyro);
 
   private final Joystick controller = new Joystick(0);
   // private final JoystickButton buttonA = new JoystickButton(controller, Buttons.A.value);

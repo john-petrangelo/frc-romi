@@ -11,6 +11,7 @@ import edu.wpi.first.wpiutil.math.MathUtil;
 import frc.robot.RomiMap;
 import frc.robot.filters.RomiPoseEstimator;
 import frc.robot.filters.TrashCompactor;
+import frc.robot.sensors.RomiGyro;
 import frc.robot.speedcontrollers.FeedforwardSpeedController;
 
 public class RomiDrivetrain extends SubsystemBase {
@@ -41,10 +42,12 @@ public class RomiDrivetrain extends SubsystemBase {
 
   private DriveCharacteristics data = myData;
 
+  private RomiGyro gyro;
+
   /**
    * Creates a new RomiDrivetrain.
    */
-  public RomiDrivetrain() {
+  public RomiDrivetrain(RomiGyro gyro) {
     super();
 
     // The Romi has onboard encoders that are hardcoded
@@ -65,6 +68,9 @@ public class RomiDrivetrain extends SubsystemBase {
     diffDrive = new DifferentialDrive(leftFFController, rightFFController);
     diffDrive.setMaxOutput(RomiMap.MAX_SPEED);
     diffDrive.setDeadband(RomiMap.CONTROLS_DEADBAND);
+
+    // TODO Depends on RomiGyro...
+    this.gyro = gyro;
 
     resetEncoders();
   }
@@ -148,7 +154,8 @@ public class RomiDrivetrain extends SubsystemBase {
     double linearRate = speed * RomiMap.MAX_SPEED;
     double turnRate = rotation * RomiMap.MAX_TURN_RATE;
 
-    pose.update(linearRate, turnRate, leftRate, rightRate);
+    System.out.printf("arcadeDriveUpdatePose %f %f %f %f\n", linearRate, turnRate, leftRate, rightRate);
+    pose.update(linearRate, turnRate, leftRate, rightRate, gyro.getRateYaw());
   }
 
   public void voltDriveLeft(double voltage) {
