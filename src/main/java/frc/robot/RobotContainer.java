@@ -23,7 +23,7 @@ import frc.robot.subsystems.RomiDrivetrain;
 public class RobotContainer {
   // Subsystems
   private final RomiGyro gyro = new RomiGyro();
-  private final RomiDrivetrain drivetrain = new RomiDrivetrain(gyro);
+  private final RomiDrivetrain drivetrain = new RomiDrivetrain();
 
   // User interface objects
   private final Joystick controller = new Joystick(0);

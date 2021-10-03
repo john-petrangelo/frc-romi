@@ -7,10 +7,8 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpiutil.math.MathUtil;
 import frc.robot.RomiMap;
 import frc.robot.filters.TrashCompactor;
-import frc.robot.sensors.RomiGyro;
 import frc.robot.speedcontrollers.FeedforwardSpeedController;
 
 public class RomiDrivetrain extends SubsystemBase {
@@ -18,9 +16,12 @@ public class RomiDrivetrain extends SubsystemBase {
   private final Spark leftMotor = new Spark(RomiMap.LEFT_WHEEL_MOTOR_ID);
   private final Spark rightMotor = new Spark(RomiMap.RIGHT_WHEEL_MOTOR_ID);
 
-  // The left and right wheel sensors.
-  private final TrashCompactor leftWheelSensor;
-  private final TrashCompactor rightWheelSensor;
+  // The Romi has onboard encoders that are hardcoded to use DIO pins 4/5
+  // for the left side and 6/7 for the right side. Unfortunately the Romi
+  // wheel sensors are noisy. We pass the raw sensor data through the
+  // "TrashCompactor" filter to ignore bogus values.
+  private final TrashCompactor leftWheelSensor = new TrashCompactor(new Encoder(4, 5));
+  private final TrashCompactor rightWheelSensor = new TrashCompactor(new Encoder(6, 7));
 
   // Limit the amount of change allowed per iteration for each sensor.
   private final FeedforwardSpeedController leftFFController;
@@ -29,44 +30,33 @@ public class RomiDrivetrain extends SubsystemBase {
   // Set up the differential drive controller.
   private final DifferentialDrive diffDrive;
 
-  private final static DriveCharacteristics myData = new DriveCharacteristics(
-      0.4687, 0.2381,  // LF
-      0.2993, 0.2685,  // LB
-      0.5561, 0.2666,  // RF
-      0.7771, 0.2545); // RB
-
-  private DriveCharacteristics data = myData;
-
-  private RomiGyro gyro;
-
   /**
    * Creates a new RomiDrivetrain.
    */
-  public RomiDrivetrain(RomiGyro gyro) {
+  public RomiDrivetrain() {
     super();
 
-    // The Romi has onboard encoders that are hardcoded
-    // to use DIO pins 4/5 and 6/7 for the left and right
-    leftWheelSensor = new TrashCompactor(new Encoder(4, 5));
+    // Let the encoders know how far each sensor pulse is in inches.
     leftWheelSensor.getEncoder().setDistancePerPulse(RomiMap.INCHES_PER_TICK);
-    rightWheelSensor = new TrashCompactor(new Encoder(6, 7));
     rightWheelSensor.getEncoder().setDistancePerPulse(RomiMap.INCHES_PER_TICK);
 
     // Create the speed controllers used for the various test modes.
     leftFFController = new FeedforwardSpeedController("L", leftMotor,
-      data.kSLeftFwd, data.kVLeftFwd, data.kSLeftBack, data.kVLeftBack);
+      0.4687, 0.2381, // Left forward (kS, kV)
+      0.2993, 0.2685  // Left backward (kS, kV)
+    );
+
     rightFFController = new FeedforwardSpeedController("R", rightMotor,
-      data.kSRightBack, data.kVRightBack, data.kSRightFwd, data.kVRightFwd);
-      // data.kSRightFwd, data.kVRightFwd, data.kSRightBack, data.kVRightBack);
+      0.7771, 0.2545, // Right forward (kS, kV)
+      0.5561, 0.2666  // Right backward (kS, kV)
+    );
 
     // Set up the differential drive controllers for the various test modes.
     diffDrive = new DifferentialDrive(leftFFController, rightFFController);
     diffDrive.setMaxOutput(RomiMap.MAX_SPEED);
     diffDrive.setDeadband(RomiMap.CONTROLS_DEADBAND);
 
-    // TODO Depends on RomiGyro...
-    this.gyro = gyro;
-
+    // Set the initial position to 0 inches.
     resetEncoders();
   }
 
@@ -84,48 +74,6 @@ public class RomiDrivetrain extends SubsystemBase {
     diffDrive.arcadeDrive(speed, rotation, false);
   }
 
-  /**
-   * Clamps the input value to the range -1.0 to 1.0.
-   * Returns 0.0 if the given value is within the specified range around zero. The remaining range
-   * between the deadband and 1.0 is scaled from 0.0 to 1.0.
-   * <br><br>
-   * NOTE: This method clamps and scales the inputs exactly the way the WPILib 
-   * {@link edu.wpi.first.wpilibj.drive.DifferentialDrive DifferentialDrive} and
-   * {@link edu.wpi.first.wpilibj.drive.RobotDriveBase RobotDriveBase} classes do.
-   * 
-   * @param value value to clamp and scale
-   */
-  protected double conditionControlInput(double value) {
-    value = MathUtil.clamp(value, -1.0, 1.0);
-
-    if (Math.abs(value) > RomiMap.CONTROLS_DEADBAND) {
-      if (value > 0.0) {
-        return (value - RomiMap.CONTROLS_DEADBAND) / (1.0 - RomiMap.CONTROLS_DEADBAND);
-      } else {
-        return (value + RomiMap.CONTROLS_DEADBAND) / (1.0 - RomiMap.CONTROLS_DEADBAND);
-      }
-    } else {
-      return 0.0;
-    }
-  }
-
-  public void voltDriveLeft(double voltage) {
-    SmartDashboard.putNumber("VoltDrive-L", voltage);
-    leftMotor.setVoltage(voltage);
-    diffDrive.feed();
-  }
-
-  public void voltDriveRight(double voltage) {
-    SmartDashboard.putNumber("VoltDrive-R", voltage);
-    rightMotor.setVoltage(-voltage);
-    diffDrive.feed();
-  }
-
-  public void voltDrive(double lVoltage, double rVoltage) {
-    voltDriveLeft(lVoltage);
-    voltDriveRight(rVoltage);
-  }
-
   public void resetEncoders() {
     leftWheelSensor.reset();
     rightWheelSensor.reset();
@@ -137,14 +85,6 @@ public class RomiDrivetrain extends SubsystemBase {
 
   public double getRightDistanceInches() {
     return rightWheelSensor.getDistance();
-  }
-
-  public double getMinDistanceInches() {
-    return Math.min(leftWheelSensor.getDistance(), rightWheelSensor.getDistance());
-  }
-
-  public double getMaxDistanceInches() {
-    return Math.max(leftWheelSensor.getDistance(), rightWheelSensor.getDistance());
   }
 
   public double getAvgDistanceInches() {
@@ -178,6 +118,7 @@ public class RomiDrivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Update the TrashCompactor filter with the new sensor values.
     leftWheelSensor.update();
     rightWheelSensor.update();
 
