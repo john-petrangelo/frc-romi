@@ -13,7 +13,7 @@ package frc.robot;
  */
 public final class RomiMap {
     /** The distance between the left and right wheels. */
-    public final static double trackWidthInches = 5.5;
+    public final static double trackWidthInches = 5.55;
 
     /** The width of each wheel */
     public final static double wheelWidthInches = 0.25;
