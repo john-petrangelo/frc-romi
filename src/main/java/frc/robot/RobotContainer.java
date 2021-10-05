@@ -8,8 +8,10 @@ import frc.robot.sensors.RomiGyro;
 import frc.robot.GrayBlueController.Axes;
 import frc.robot.GrayBlueController.Buttons;
 import frc.robot.commands.ArcadeDriveCmd;
+import frc.robot.commands.ArmPositionCmd;
 import frc.robot.commands.DriveDistanceCmd;
 import frc.robot.commands.TurnDegreesCmd;
+import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.RomiDrivetrain;
 
 /**
@@ -23,6 +25,7 @@ public class RobotContainer {
   // Subsystems
   private final RomiGyro gyro = new RomiGyro();
   private final RomiDrivetrain drivetrain = new RomiDrivetrain();
+  private final Arm arm = new Arm();
 
   // User interface objects
   private final Joystick controller = new Joystick(0);
@@ -58,6 +61,10 @@ public class RobotContainer {
 
     povLeft.whenPressed(new TurnDegreesCmd(-73, drivetrain, gyro));
     povRight.whenPressed(new TurnDegreesCmd(73, drivetrain, gyro));
+
+    buttonX.whenPressed(new ArmPositionCmd(1.0, arm));
+    buttonY.whenPressed(new ArmPositionCmd(0.5, arm));
+    buttonB.whenPressed(new ArmPositionCmd(0.0, arm));
 
     buttonBack.whenPressed(()  -> gyro.reset());
   }
