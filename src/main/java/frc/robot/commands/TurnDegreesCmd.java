@@ -8,7 +8,7 @@ public class TurnDegreesCmd extends CommandBase {
     private RomiDrivetrain drivetrain;
     private RomiGyro gyro;
     private double degrees;
-    private final double SPEED = 0.2;
+    private final double SPEED = 0.3;
 
     public TurnDegreesCmd(double degrees, RomiDrivetrain drivetrain, RomiGyro gyro) {
         this.drivetrain = drivetrain;
@@ -16,7 +16,6 @@ public class TurnDegreesCmd extends CommandBase {
         this.degrees = degrees;
 
         addRequirements(drivetrain);
-        addRequirements(gyro);
         setName("TurnWithGyro(" + degrees + ")");
     }
 

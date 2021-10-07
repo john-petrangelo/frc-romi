@@ -3,10 +3,9 @@ package frc.robot.sensors;
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDevice.Direction;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.hal.SimDouble;
 
-public class RomiGyro extends SubsystemBase {
+public class RomiGyro extends SensorBase {
   private SimDouble m_simRateX;
   private SimDouble m_simRateY;
   private SimDouble m_simRateZ;

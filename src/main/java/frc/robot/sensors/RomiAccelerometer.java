@@ -3,9 +3,8 @@ package frc.robot.sensors;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.interfaces.Accelerometer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class RomiAccelerometer extends SubsystemBase {
+public class RomiAccelerometer extends SensorBase {
   private final double PERIOD_SECS = 0.020; 
 
   // The accelerometer reads no-zero values at rest. Adjust these values to
@@ -80,7 +79,6 @@ public class RomiAccelerometer extends SubsystemBase {
     speedZ = 0.0;    
   }
 
-  @Override
   public void periodic() {
     // Accumulate acclerations into speeds.
     speedX += getX() * PERIOD_SECS;
