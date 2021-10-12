@@ -9,6 +9,7 @@ import frc.robot.GrayBlueController.Axes;
 import frc.robot.GrayBlueController.Buttons;
 import frc.robot.commands.ArcadeDriveCmd;
 import frc.robot.commands.ArmPositionCmd;
+import frc.robot.commands.ArmPositionFollowGyroCmd;
 import frc.robot.commands.DriveDistanceCmd;
 import frc.robot.commands.TurnDegreesCmd;
 import frc.robot.subsystems.Arm;
@@ -43,7 +44,7 @@ public class RobotContainer {
   private final JoystickButton rightBumper = new JoystickButton(controller, Buttons.BumperRight.value);
 
   public RobotContainer() {
-    // The default command is run when no other commands are active.
+    // The default command is run when no other commands are active for the subsystem.
     drivetrain.setDefaultCommand(new ArcadeDriveCmd(drivetrain,
         () -> -controller.getRawAxis(Axes.LeftY.value),
         () ->  controller.getRawAxis(Axes.RightX.value)
@@ -62,9 +63,10 @@ public class RobotContainer {
     povLeft.whenPressed(new TurnDegreesCmd(-73, drivetrain, gyro));
     povRight.whenPressed(new TurnDegreesCmd(73, drivetrain, gyro));
 
-    buttonX.whenPressed(new ArmPositionCmd(1.0, arm));
-    buttonY.whenPressed(new ArmPositionCmd(0.5, arm));
-    buttonB.whenPressed(new ArmPositionCmd(0.0, arm));
+    buttonX.whenPressed(new ArmPositionCmd(-90, arm));
+    buttonY.whenPressed(new ArmPositionCmd(  0, arm));
+    buttonB.whenPressed(new ArmPositionCmd( 90, arm));
+    buttonA.whenPressed(new ArmPositionFollowGyroCmd(arm, gyro));
 
     buttonBack.whenPressed(()  -> gyro.reset());
   }

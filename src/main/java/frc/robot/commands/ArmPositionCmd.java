@@ -5,10 +5,10 @@ import frc.robot.subsystems.Arm;
 
 public class ArmPositionCmd extends CommandBase {
     private final Arm arm;
-    private final double position;
+    private final double degrees;
 
-    public ArmPositionCmd(double position, Arm arm) {
-        this.position = position;
+    public ArmPositionCmd(double degrees, Arm arm) {
+        this.degrees = degrees;
         this.arm = arm;
 
         addRequirements(arm);
@@ -17,7 +17,7 @@ public class ArmPositionCmd extends CommandBase {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        arm.setPosition(position);
+        arm.setPosition(degrees);
     }
 
     // Returns true when the command should end.

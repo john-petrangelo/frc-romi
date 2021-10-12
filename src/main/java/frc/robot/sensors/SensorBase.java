@@ -5,11 +5,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
 
 /**
- * A base for sensors that handles Sendable registration in the constructor.
+ * A base class for sensors that handles Sendable registration in the constructor.
  */
 public abstract class SensorBase implements Sendable {
-
-  /** Constructor. */
   public SensorBase() {
     String name = this.getClass().getSimpleName();
     name = name.substring(name.lastIndexOf('.') + 1);
@@ -18,8 +16,6 @@ public abstract class SensorBase implements Sendable {
 
   /**
    * Gets the name of this Sensor.
-   *
-   * @return Name
    */
   @Override
   public String getName() {
@@ -28,8 +24,6 @@ public abstract class SensorBase implements Sendable {
 
   /**
    * Sets the name of this Sensor.
-   *
-   * @param name name
    */
   @Override
   public void setName(String name) {
