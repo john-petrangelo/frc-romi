@@ -32,6 +32,9 @@ public class ArmPositionFollowGyroCmd extends CommandBase {
         if (angle > 180.0) {
             angle -= 360;
         }
+        if (angle < -180.0) {
+            angle += 360;
+        }
 
         // Finally, tell the arm where to go.
         arm.setPosition(angle);
