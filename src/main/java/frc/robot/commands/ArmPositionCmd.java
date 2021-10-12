@@ -14,9 +14,9 @@ public class ArmPositionCmd extends CommandBase {
         addRequirements(arm);
     }
 
-    // Called every time the scheduler runs while the command is scheduled.
+    // Called once when the command is scheduled.
     @Override
-    public void execute() {
+    public void initialize() {
         arm.setPosition(degrees);
     }
 
