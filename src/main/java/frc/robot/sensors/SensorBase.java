@@ -11,7 +11,14 @@ public abstract class SensorBase implements Sendable {
   public SensorBase() {
     String name = this.getClass().getSimpleName();
     name = name.substring(name.lastIndexOf('.') + 1);
-    SendableRegistry.addLW(this, name);
+
+    // It's a bit of a hack, but the SendableRegistry uses the "subsystem" to group 
+    // LW items. By making all sensors use the "Sensors" subsystem we can force all
+    // sensor readings to be grouped in the same section of Network Tables.
+    //
+    // NOTE: This does NOT make the sensors actual subsystems as understood by commands
+    //       or the CommandScheduler.
+    SendableRegistry.addLW(this, "Sensors", name);
   }
 
   /**
